@@ -19,31 +19,12 @@ O objetivo do jogo é facilitar o ensino-aprendizagem dos ODS ao mesmo tempo que
 O propósito da aplicação da GCM, por sua vez, consiste em identificar, organizar e controlar as mudanças no software a fim de evitar retrabalho, minimizar erros e facilitar atualizações e melhorias no sistema. Logo, sua utilização promove a garantia de qualidade do software durante todo o processo de construção do produto, portanto, ao longo do ciclo de vida do software (Malhone; Frigeri, 2021).
 
 
-<!-- ## 🛠️ Desenvolvimento
+### Referências
 
+BORGES, R. K.; NEVES, C. A. de A. Explorando jogos educativos para o ensino dos objetivos de desenvolvimento sustentável (odss: Uma revisão sistemática. Revista Gestão & Sustentabilidade Ambiental, v. 12, p. e20167–e20167, 2023.
 
-### 🏛️ Arquitetura ______
+MALHONE, M. M.; FRIGERI, M. A importância do gerenciamento de configuração para o ciclo de vida do software: um estudo de caso baseado nas diretrizes da engenharia de software. Revista Brasileira em Tecnologia da Informação, v. 3, n. 1, p. 14–23, 2021.
 
- 
-- **Padrão Arquitetural**: *Model-View-Controller*
-  - Garantia da separação de tarefas, facilitando assim a reescrita de alguma parte, e a manutenção do código.
-
-
-### ⚙️ Tecnologias
-
-
-- **Back-end**:
-  - **Linguagem de Programação**: ______
-
-
-- **Front-end**:
-  - **Linguagem de Programação**: ______
-  - **Biblioteca**: ______
-
-
-- **Armazenamento**:
-  - **Banco de Dados**: _____
-  - **Imagem**: _____ -->
 
 ---
 
