@@ -1,8 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+:root {
+  --font-family-base: 'Lato', Arial, Helvetica, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-bold: 700;
+}
+
 @import './variables.css';
 
 body {
   margin: 0;
-  font-family: 'Lato', sans-serif;
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-regular);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: var(--background-color-primary);
