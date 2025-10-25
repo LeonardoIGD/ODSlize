@@ -1,8 +1,9 @@
 import './styles/global.css';
 import Button from './components/common/Button';
-import Modal from './components/common/Modal'; // ✅ novo import
+import Modal from './components/common/Modal';
+import Header from './components/ui/Header'; // ✅ novo import
 import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,10 +44,7 @@ function Game() {
 function App() {
   return (
     <Router>
-      <nav style={{ marginBottom: 20 }}>
-        <Link to="/" style={{ marginRight: 10 }}>Home</Link>
-        <Link to="/game">Game</Link>
-      </nav>
+      <Header /> {/* ✅ substitui o <nav> antigo */}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/game" element={<Game />} />
