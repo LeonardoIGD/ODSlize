@@ -1,0 +1,1 @@
+export { BoardFactory } from './BoardFactory';
