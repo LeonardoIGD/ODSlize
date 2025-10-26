@@ -9,25 +9,25 @@ export class ShufflerStrategy {
 export const LEVEL_CONFIGS = {
   1: { 
     size: { rows: 2, cols: 2 }, 
-    movementRange: [3, 6],
+    movementRange: [2, 4],
     name: "Nível 2x2",
     totalPieces: 4
   },
   2: { 
     size: { rows: 3, cols: 3 }, 
-    movementRange: [40, 60],
+    movementRange: [8, 16],
     name: "Nível 3x3", 
     totalPieces: 9
   },
   3: { 
     size: { rows: 4, cols: 4 }, 
-    movementRange: [60, 80],
+    movementRange: [20, 40],
     name: "Nível 4x4",
     totalPieces: 16
   },
   4: { 
     size: { rows: 3, cols: 6 }, 
-    movementRange: [80, 100],
+    movementRange: [30, 50],
     name: "Nível Especial 3x6",
     totalPieces: 18
   }
@@ -44,7 +44,6 @@ export class RandomMovesStrategy extends ShufflerStrategy {
     const boardCopy = [...board];
     const { movementRange, size } = levelConfig;
 
-    // Escolhe número aleatório de movimentos dentro da faixa
     const minMoves = movementRange[0];
     const maxMoves = movementRange[1];
     const movementsCount = Math.floor(Math.random() * (maxMoves - minMoves + 1)) + minMoves;
@@ -53,11 +52,16 @@ export class RandomMovesStrategy extends ShufflerStrategy {
     let blankPosition = this.findBlankPosition(boardCopy, size);
     let lastDirection = null;
 
+    let successfulMoves = 0;
     let attemptCount = 0;
-    for (let i = 0; i < movementsCount && attemptCount < movementsCount * 2; attemptCount++) {
+    const maxAttempts = movementsCount * 10;
+
+    while (successfulMoves < movementsCount && attemptCount < maxAttempts) {
       const availableDirections = this.getValidDirections(blankPosition, lastDirection, size);
 
       if (availableDirections.length === 0) {
+        lastDirection = null;
+        attemptCount++;
         continue;
       }
 
@@ -67,26 +71,27 @@ export class RandomMovesStrategy extends ShufflerStrategy {
       const newBlankPosition = this.moveInDirection(blankPosition, direction);
 
       if (this.isValidPosition(newBlankPosition, size)) {
-        // Faz o movimento
         this.swapPositions(boardCopy, blankPosition, newBlankPosition, size);
 
-        // Salva o movimento inverso para a solução
         solutionMoves.push(this.getInverseDirection(direction));
 
         blankPosition = newBlankPosition;
         lastDirection = direction;
-        i++; // Incrementa apenas quando movimento é válido
+        successfulMoves++;
       }
+
+      attemptCount++;
     }
 
     return {
       board: boardCopy,
-      solutionMoves: solutionMoves.reverse() // Inverte para ter a sequência correta de solução
+      solutionMoves: solutionMoves.toReversed()
     };
   }
 
   findBlankPosition(board, size) {
     const index = board.indexOf(0);
+
     return {
       row: Math.floor(index / size.cols),
       col: index % size.cols
@@ -95,14 +100,12 @@ export class RandomMovesStrategy extends ShufflerStrategy {
 
   getValidDirections(position, lastDirection, size) {
     const directions = [];
-
-    // Evita movimento contrário ao último
     const forbidden = this.getInverseDirection(lastDirection);
 
-    if (position.row > 0 && 'down' !== forbidden) directions.push('up');
-    if (position.row < size.rows - 1 && 'up' !== forbidden) directions.push('down');
-    if (position.col > 0 && 'right' !== forbidden) directions.push('left');
-    if (position.col < size.cols - 1 && 'left' !== forbidden) directions.push('right');
+    if (position.row > 0 && 'up' !== forbidden) directions.push('up');
+    if (position.row < size.rows - 1 && 'down' !== forbidden) directions.push('down');
+    if (position.col > 0 && 'left' !== forbidden) directions.push('left');
+    if (position.col < size.cols - 1 && 'right' !== forbidden) directions.push('right');
 
     return directions;
   }
@@ -156,8 +159,8 @@ export const createSolvedBoard = (levelConfig) => {
   for (let i = 1; i < totalCells; i++) {
     board.push(i);
   }
-  board.push(0); // Espaço vazio sempre no final
 
+  board.push(0);
   return board;
 };
 
