@@ -5,33 +5,62 @@ export class ShufflerStrategy {
   }
 }
 
+// Função para calcular o range de movimentos baseado no nível
+const calculateMovementRange = (level, totalPieces) => {
+  if (level === 1) {
+    return [2, 3];
+  }
+
+  const multipliers = {
+    2: 1.3,  // Moderado
+    3: 2.8,  // Difícil  
+    4: 3.2   // Muito difícil
+  };
+
+  const multiplier = multipliers[level] || 2.5;
+  const base = Math.floor(totalPieces * multiplier);
+  const variation = Math.floor(base * 0.3);
+
+  return [base - variation, base + variation];
+};
+
 // Configurações dos níveis
-export const LEVEL_CONFIGS = {
+// Configurações base dos níveis (sem movementRange)
+const BASE_LEVEL_CONFIGS = {
   1: { 
     size: { rows: 2, cols: 2 }, 
-    movementRange: [2, 4],
     name: "Nível 2x2",
     totalPieces: 4
   },
   2: { 
     size: { rows: 3, cols: 3 }, 
-    movementRange: [8, 16],
     name: "Nível 3x3", 
     totalPieces: 9
   },
   3: { 
     size: { rows: 4, cols: 4 }, 
-    movementRange: [20, 40],
     name: "Nível 4x4",
     totalPieces: 16
   },
   4: { 
     size: { rows: 3, cols: 6 }, 
-    movementRange: [30, 50],
     name: "Nível Especial 3x6",
     totalPieces: 18
   }
 };
+
+// Gera configurações dos níveis
+export const LEVEL_CONFIGS = Object.keys(BASE_LEVEL_CONFIGS).reduce((configs, level) => {
+  const levelNum = Number.parseInt(level);
+  const baseConfig = BASE_LEVEL_CONFIGS[level];
+  
+  configs[level] = {
+    ...baseConfig,
+    movementRange: calculateMovementRange(levelNum, baseConfig.totalPieces)
+  };
+  
+  return configs;
+}, {});
 
 // Estratégia que usa movimentos aleatórios válidos
 export class RandomMovesStrategy extends ShufflerStrategy {
