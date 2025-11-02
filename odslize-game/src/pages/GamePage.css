@@ -1,0 +1,225 @@
+/* New Game Page Styles */
+.new-game-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Level Selector */
+.level-selector {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.level-selector h2 {
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.level-buttons {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.level-button {
+  padding: 12px 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.level-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.level-button.selected {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.level-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.level-button:disabled:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: none;
+}
+
+/* Start Section */
+.start-section {
+  margin-bottom: 30px;
+}
+
+.start-button {
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: linear-gradient(45deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.start-button:hover {
+  background: linear-gradient(45deg, #45a049, #4CAF50);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.start-button:disabled {
+  background: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Game Components Layout */
+.new-game-page .game-info {
+  margin-bottom: 20px;
+}
+
+.new-game-page .game-board {
+  margin-bottom: 20px;
+}
+
+.new-game-page .game-controls {
+  margin-bottom: 20px;
+}
+
+/* Debug Info */
+.debug-info {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  z-index: 1000;
+  max-width: 200px;
+}
+
+.debug-info h3 {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+}
+
+.debug-info p {
+  margin: 5px 0;
+  word-break: break-word;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .new-game-page {
+    padding: 10px;
+  }
+  
+  .level-buttons {
+    gap: 10px;
+  }
+  
+  .level-button {
+    min-width: 120px;
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+  
+  .level-selector h2 {
+    font-size: 1.5rem;
+  }
+  
+  .start-button {
+    padding: 12px 25px;
+    font-size: 1.1rem;
+  }
+  
+  .debug-info {
+    position: relative;
+    margin-top: 20px;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .level-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .level-button {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+/* Board Reveal Overlay */
+.reveal-board-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  text-align: center;
+}
+
+.reveal-button {
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  animation: pulse 2s infinite;
+}
+
+.reveal-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(135deg, #ff5252, #d84315);
+}
+
+.reveal-button:active {
+  transform: translateY(0);
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  }
+  50% {
+    box-shadow: 0 6px 30px rgba(255, 107, 107, 0.6);
+  }
+  100% {
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  }
+}
