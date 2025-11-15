@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import { createContext, useContext } from 'react';
 import { useGameState } from '../hooks/game/useGameState';
 
 const GameContext = createContext();

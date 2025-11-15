@@ -3,11 +3,52 @@
   --font-family-base: 'Lato', Arial, Helvetica, sans-serif;
   --font-weight-regular: 400;
   --font-weight-bold: 700;
-  --primary-color: #4CAF50;
-  --secondary-color: #FFC107;
-  --background-color-primary: #f0f2f5;
-  --text-color-primary: #333;
-  --font-family-primary: 'Lato', sans-serif;
+  --font-weight-black: 900;
+  
+  /* SDG Brand Colors */
+  --sdg-teal: #2B8B81;
+  --sdg-teal-dark: #236b64;
+  --sdg-orange: #E28F39;
+  --sdg-orange-dark: #c77a2a;
+  --sdg-red: #CA1942;
+  --sdg-red-dark: #a21437;
+  --sdg-gray: #D2CFD0;
+  --sdg-gray-light: #e8e6e7;
+  --sdg-gray-dark: #9e9b9d;
+  --sdg-white: #FFF;
+  
+  /* Legacy aliases for compatibility */
+  --sdg-green: var(--sdg-teal);
+  --sdg-green-dark: var(--sdg-teal-dark);
+  
+  /* Primary colors based on SDG */
+  --primary-color: var(--sdg-teal);
+  --secondary-color: var(--sdg-orange);
+  --accent-color: var(--sdg-red);
+  --neutral-color: var(--sdg-gray);
+  
+  /* Background and layout */
+  --background-color-primary: #ffffff;
+  --background-gradient-primary: linear-gradient(135deg, var(--sdg-gray) 0%, var(--sdg-white) 50%, var(--sdg-gray) 100%);
+  --background-gradient-secondary: radial-gradient(circle at 20% 50%, rgba(43, 139, 129, 0.15), transparent 50%), radial-gradient(circle at 80% 80%, rgba(226, 143, 57, 0.15), transparent 50%);
+  
+  /* Text colors */
+  --text-color-primary: var(--sdg-teal);
+  --text-color-secondary: var(--sdg-orange);
+  --text-color-accent: var(--sdg-red);
+  --text-color-muted: #666;
+  
+  /* Component styling */
+  --border-color: rgba(43, 139, 129, 0.2);
+  --shadow-light: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 6px 20px rgba(0, 0, 0, 0.15);
+  --shadow-heavy: 0 8px 30px rgba(0, 0, 0, 0.2);
+  
+  /* Sizing */
   --font-size-base: 16px;
   --spacing-unit: 8px;
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 16px;
+  --border-radius-xl: 20px;
 }
