@@ -1,5 +1,6 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useMemo } from 'react';
 import { useGameState } from '../hooks/game/useGameState';
+import { useAuth } from './AuthContext';
 
 const GameContext = createContext();
 
@@ -27,9 +28,17 @@ export const ODS_IMAGES = [
 // Game Provider usando State Pattern e hooks personalizados
 export const GameProvider = ({ children }) => {
   const gameState = useGameState();
+  const auth = useAuth();
+
+  // Adiciona informações do usuário ao contexto do jogo
+  const gameContextValue = useMemo(() => ({
+    ...gameState,
+    getCurrentUser: () => auth.user,
+    isAuthenticated: auth.isAuthenticated
+  }), [gameState, auth.user, auth.isAuthenticated]);
 
   return (
-    <GameContext.Provider value={gameState}>
+    <GameContext.Provider value={gameContextValue}>
       {children}
     </GameContext.Provider>
   );

@@ -1,4 +1,5 @@
 import { GameState } from './GameState';
+import { scoreService } from '../../services/scoreService';
 
 // Cores dos ODS baseadas no padrão oficial da ONU
 const ODS_COLORS = {
@@ -23,8 +24,37 @@ const ODS_COLORS = {
 
 // Estado quando o nível é completado
 export class LevelCompletedState extends GameState {
-  enter() {
+  async enter() {
+    await this.saveScore();
     this.displayCompletionModal();
+  }
+
+  async saveScore() {
+    try {
+      const stateData = this.context.getStateData();
+      const { moves = 0, timeElapsed = 0, currentLevel = 1 } = stateData;
+      
+      const scoreData = {
+        level: currentLevel,
+        moves: moves,
+        time: timeElapsed
+      };
+
+      // Obter informações do usuário se estiver autenticado
+      const user = this.context.getCurrentUser ? this.context.getCurrentUser() : null;
+      
+      if (user && user.userId) {
+        // Salvar score do usuário autenticado
+        await scoreService.saveUserScore(user.userId, scoreData);
+        console.log('Score saved for authenticated user:', user.userId);
+      } else {
+        // Salvar score local
+        scoreService.saveLocalScore(scoreData);
+        console.log('Score saved locally');
+      }
+    } catch (error) {
+      console.error('Failed to save score:', error);
+    }
   }
 
   exit() {

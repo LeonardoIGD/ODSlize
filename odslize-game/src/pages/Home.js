@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../contexts/AuthContext';
+import { AuthModal } from '../components/auth/AuthModal';
+import { UserStats } from '../components/auth/UserStats';
 import './Home.css';
 
 const HelpCircle = ({ className }) => (
@@ -45,6 +48,17 @@ const Recycle = ({ className }) => (
 const Home = () => {
   const navigate = useNavigate();
   const [showTutorial, setShowTutorial] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const { isAuthenticated, user, signOut, isAvailable } = useAuth();
+
+  const handleAuthClick = () => {
+    if (isAuthenticated) {
+      signOut();
+    } else {
+      setShowAuthModal(true);
+    }
+  };
 
   const handleStartGame = () => {
     localStorage.setItem('autoStartGame', 'true');
@@ -234,10 +248,55 @@ const Home = () => {
             </motion.div>
           </motion.div>
 
+          {/* Seção de Autenticação */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.6 }}
+            className="auth-section-home"
+          >
+            {isAvailable && (
+              <div className="auth-buttons-container">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setShowStatsModal(true)}
+                  className="home-stats-button"
+                  title="Ver suas estatísticas"
+                >
+                  📊 Estatísticas
+                </motion.button>
+
+                {isAuthenticated && user ? (
+                  <div className="user-info-home">
+                    <span className="user-greeting-home">Olá, {user.displayName || user.email || user.userId}!</span>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleAuthClick}
+                      className="home-auth-button logout"
+                    >
+                      Sair
+                    </motion.button>
+                  </div>
+                ) : (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleAuthClick}
+                    className="home-auth-button login"
+                  >
+                    🔑 Login
+                  </motion.button>
+                )}
+              </div>
+            )}
+          </motion.div>
+
           <motion.button
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.8, duration: 0.6, type: "spring", stiffness: 200 }}
+            transition={{ delay: 0.9, duration: 0.6, type: "spring", stiffness: 200 }}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.92 }}
             onClick={handleStartGame}
@@ -272,6 +331,17 @@ const Home = () => {
           </a>
         </div>
       </motion.footer>
+
+      {/* Modais */}
+      <AuthModal 
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
+
+      <UserStats 
+        isOpen={showStatsModal}
+        onClose={() => setShowStatsModal(false)}
+      />
     </div>
   );
 };
