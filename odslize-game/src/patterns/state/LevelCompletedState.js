@@ -45,7 +45,8 @@ export class LevelCompletedState extends GameState {
       odsInfo: odsInfo,
       onNextLevel: () => this.goToNextLevel(),
       onRestart: () => this.restartLevel(),
-      onHome: () => this.goToHome()
+      onHome: () => this.goToHome(),
+      onClose: () => this.closeModalAndReturnToGame()
     });
   }
 
@@ -111,6 +112,34 @@ export class LevelCompletedState extends GameState {
     return false;
   }
 
+  startLevel() {
+    // Reinicia o nível atual
+    this.restartLevel();
+    return true;
+  }
+
+  selectLevel(level) {
+    this.hideCompletionModal();
+    
+    // Atualiza o nível selecionado e vai para StartingState
+    this.context.setStateData({
+      selectedLevel: level,
+      currentLevel: level,
+      moves: 0,
+      timeElapsed: 0,
+      isLevelCompleted: false,
+      board: [],
+      solutionMoves: [],
+      isShuffling: false,
+      isSolving: false,
+      isGameReady: false
+    });
+    
+    const { StartingState } = require('./StartingState');
+    this.changeState(new StartingState(this.context));
+    return true;
+  }
+
   restartLevel() {
     this.hideCompletionModal();
     const { StartingState } = require('./StartingState');
@@ -136,6 +165,12 @@ export class LevelCompletedState extends GameState {
     this.hideCompletionModal();
     const { IdleState } = require('./IdleState');
     this.changeState(new IdleState(this.context));
+  }
+
+  closeModalAndReturnToGame() {
+    this.hideCompletionModal();
+    const { StartingState } = require('./StartingState');
+    this.changeState(new StartingState(this.context));
   }
 
   showAllLevelsCompletedMessage() {

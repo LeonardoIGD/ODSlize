@@ -171,11 +171,16 @@ export class PlayingState extends GameState {
       isSolving: false,
       isGameReady: false
     });
-    
     // Volta para IdleState para permitir nova inicialização
     const { IdleState } = require('./IdleState');
     this.changeState(new IdleState(this.context));
     
+    return true;
+  }
+
+  startLevel() {
+    // No PlayingState, startLevel significa reiniciar o nível atual
+    this.restartLevel();
     return true;
   }
 
