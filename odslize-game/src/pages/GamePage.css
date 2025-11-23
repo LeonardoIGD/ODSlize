@@ -8,6 +8,32 @@
   overflow-x: hidden;
 }
 
+/* Botão Voltar para Home */
+.back-to-home-button {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--sdg-teal);
+  color: var(--sdg-teal);
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.back-to-home-button:hover {
+  background: var(--sdg-teal);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(20, 184, 166, 0.3);
+}
+
 .new-game-page::before {
   content: '';
   position: fixed;

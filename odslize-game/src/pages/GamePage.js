@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameState } from '../hooks/game/useGameState';
+import { motion } from 'framer-motion';
 import { 
   GameBoard, 
   GameInfo, 
@@ -92,6 +93,20 @@ const GamePage = () => {
 
   return (
     <div className="new-game-page">
+      {/* Botão Voltar para Home */}
+      <motion.button
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.2 }}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={handleGoHome}
+        className="back-to-home-button"
+        title="Voltar para Home"
+      >
+        ← Home
+      </motion.button>
+
       <div className="game-container">
         <GameHeader 
           title={odsDisplay.isVisible ? odsDisplay.title : `Nível ${currentLevel || selectedLevel}`}
