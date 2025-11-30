@@ -20,7 +20,14 @@ export const AuthModal = ({ isOpen, onClose }) => {
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
 
-  const { signIn, signUp, confirmRegistration, resendConfirmationCode, error, clearError, isAvailable } = useAuth();
+  // Forgot password form state
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [needsPasswordReset, setNeedsPasswordReset] = useState(false);
+  const [resetCode, setResetCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+
+  const { signIn, signUp, confirmRegistration, resendConfirmationCode, forgotPassword, confirmPassword, error, clearError, isAvailable } = useAuth();
 
   const resetForms = () => {
     setLoginEmail('');
@@ -31,12 +38,18 @@ export const AuthModal = ({ isOpen, onClose }) => {
     setConfirmationCode('');
     setNeedsConfirmation(false);
     setPendingEmail('');
+    setForgotEmail('');
+    setNeedsPasswordReset(false);
+    setResetCode('');
+    setNewPassword('');
+    setConfirmNewPassword('');
     clearError();
   };
 
   const handleClose = () => {
     resetForms();
     setActiveTab('login');
+    setNeedsPasswordReset(false);
     onClose();
   };
 
@@ -61,10 +74,10 @@ export const AuthModal = ({ isOpen, onClose }) => {
     clearError();
 
     try {
-      await signUp(signupEmail, signupPassword, signupUsername);
+      const username = signupUsername.trim() || signupEmail;
+      await signUp(signupEmail, signupPassword, username);
       setPendingEmail(signupEmail);
       setNeedsConfirmation(true);
-      alert('Conta criada! Verifique seu email para o código de confirmação.');
     } catch (error) {
       console.error('Signup error:', error);
     } finally {
@@ -78,11 +91,11 @@ export const AuthModal = ({ isOpen, onClose }) => {
     clearError();
 
     try {
-      await confirmRegistration(pendingEmail, confirmationCode);
+      const identifier = signupUsername.trim() || pendingEmail;
+      await confirmRegistration(identifier, confirmationCode);
       setNeedsConfirmation(false);
       setPendingEmail('');
       setActiveTab('login');
-      alert('Conta confirmada! Faça login agora.');
     } catch (error) {
       console.error('Confirmation error:', error);
     } finally {
@@ -94,9 +107,46 @@ export const AuthModal = ({ isOpen, onClose }) => {
     setIsLoading(true);
     try {
       await resendConfirmationCode(pendingEmail);
-      alert('Código reenviado! Verifique seu email.');
     } catch (error) {
       console.error('Resend error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    clearError();
+
+    try {
+      await forgotPassword(forgotEmail);
+      setPendingEmail(forgotEmail);
+      setNeedsPasswordReset(true);
+    } catch (error) {
+      console.error('Forgot password error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    clearError();
+
+    if (newPassword !== confirmNewPassword) {
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      await confirmPassword(pendingEmail, resetCode, newPassword);
+      setNeedsPasswordReset(false);
+      setPendingEmail('');
+      setActiveTab('login');
+    } catch (error) {
+      console.error('Reset password error:', error);
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +160,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="modal-overlay"
+            className="auth-modal-overlay"
             onClick={handleClose}
           >
             <motion.div
@@ -119,23 +169,23 @@ export const AuthModal = ({ isOpen, onClose }) => {
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               onClick={(e) => e.stopPropagation()}
-              className="modal-container"
+              className="auth-modal-container"
             >
               <button
                 onClick={handleClose}
-                className="modal-close-btn"
+                className="auth-modal-close-btn"
               >
-                <X className="close-icon" />
+                <X className="auth-modal-close-icon" />
               </button>
-              <div className="auth-unavailable">
-                <h2 className="unavailable-title">Autenticação Indisponível</h2>
-                <p className="unavailable-message">O serviço de autenticação não está configurado.</p>
-                <p className="unavailable-message">Você pode continuar jogando sem fazer login.</p>
+              <div className="auth-modal-unavailable">
+                <h2 className="auth-modal-unavailable-title">Autenticação Indisponível</h2>
+                <p className="auth-modal-unavailable-message">O serviço de autenticação não está configurado.</p>
+                <p className="auth-modal-unavailable-message">Você pode continuar jogando sem fazer login.</p>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={handleClose}
-                  className="btn-primary full-width"
+                  className="auth-modal-btn-primary auth-modal-full-width"
                 >
                   Continuar sem Login
                 </motion.button>
@@ -155,7 +205,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="modal-overlay"
+        className="auth-modal-overlay"
         onClick={handleClose}
       >
         <motion.div
@@ -164,46 +214,42 @@ export const AuthModal = ({ isOpen, onClose }) => {
           exit={{ scale: 0.9, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           onClick={(e) => e.stopPropagation()}
-          className="modal-container"
+          className="auth-modal-container"
         >
-          {/* Close Button */}
           <button
             onClick={handleClose}
-            className="modal-close-btn"
+            className="auth-modal-close-btn"
           >
-            <X className="close-icon" />
+            <X className="auth-modal-close-icon" />
           </button>
 
           {needsConfirmation ? (
-            // Confirmation Screen
             <>
-              {/* Header */}
-              <div className="modal-header">
-                <div className="header-content">
-                  <div className="header-icon">
-                    <KeyRound className="icon-large" />
+              <div className="auth-modal-header">
+                <div className="auth-modal-header-content">
+                  <div className="auth-modal-header-icon">
+                    <KeyRound className="auth-modal-icon-large" />
                   </div>
-                  <h2 className="modal-title">Confirmar Conta</h2>
+                  <h2 className="auth-modal-title">Confirmar Conta</h2>
                 </div>
-                <p className="header-subtitle">Digite o código enviado para seu email</p>
+                <p className="auth-modal-header-subtitle">Digite o código enviado para seu email</p>
               </div>
 
-              {/* Content */}
-              <div className="modal-content">
-                {error && <div className="error-message">{error}</div>}
+              <div className="auth-modal-content">
+                {error && <div className="auth-modal-error-message">{error}</div>}
                 
-                <div className="confirmation-info">
+                <div className="auth-modal-confirmation-info">
                   <p>Enviamos um código de confirmação para:</p>
-                  <strong className="confirmation-email">{pendingEmail}</strong>
+                  <strong className="auth-modal-confirmation-email">{pendingEmail}</strong>
                 </div>
                 
-                <form onSubmit={handleConfirmation} className="auth-form">
-                  <div className="form-group">
-                    <label htmlFor="confirmationCode" className="form-label">
+                <form onSubmit={handleConfirmation} className="auth-modal-form">
+                  <div className="auth-modal-form-group">
+                    <label htmlFor="confirmationCode" className="auth-modal-form-label">
                       Código de Confirmação
                     </label>
-                    <div className="input-container">
-                      <KeyRound className="input-icon" />
+                    <div className="auth-modal-input-container">
+                      <KeyRound className="auth-modal-input-icon" />
                       <input
                         type="text"
                         id="confirmationCode"
@@ -212,27 +258,27 @@ export const AuthModal = ({ isOpen, onClose }) => {
                         placeholder="Digite o código recebido"
                         required
                         maxLength={6}
-                        className="form-input with-icon"
+                        className="auth-modal-form-input auth-modal-with-icon"
                       />
                     </div>
                   </div>
 
-                  <div className="auth-actions">
+                  <div className="auth-modal-actions">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       type="submit"
                       disabled={isLoading || confirmationCode.length !== 6}
-                      className="btn-primary full-width"
+                      className="auth-modal-btn-primary auth-modal-full-width"
                     >
                       {isLoading ? (
                         <>
-                          <div className="loading-spinner" />
+                          <div className="auth-modal-loading-spinner" />
                           Confirmando...
                         </>
                       ) : (
                         <>
-                          <KeyRound className="btn-icon" />
+                          <KeyRound className="auth-modal-btn-icon" />
                           Confirmar Conta
                         </>
                       )}
@@ -242,7 +288,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
                       type="button"
                       onClick={handleResendCode}
                       disabled={isLoading}
-                      className="btn-link full-width"
+                      className="auth-modal-btn-link auth-modal-full-width"
                     >
                       Reenviar Código
                     </button>
@@ -251,59 +297,63 @@ export const AuthModal = ({ isOpen, onClose }) => {
               </div>
             </>
           ) : (
-            // Main Auth Screen
             <>
-              {/* Header */}
-              <div className="modal-header">
-                <div className="header-content">
-                  <div className="header-icon">
-                    <LogIn className="icon-large" />
+              <div className="auth-modal-header">
+                <div className="auth-modal-header-content">
+                  <div className="auth-modal-header-icon">
+                    {activeTab === 'forgot' ? (
+                      <KeyRound className="auth-modal-icon-large" />
+                    ) : (
+                      <LogIn className="auth-modal-icon-large" />
+                    )}
                   </div>
-                  <h2 className="modal-title">
-                    {activeTab === 'login' ? 'Entrar' : 'Criar Conta'}
+                  <h2 className="auth-modal-title">
+                    {activeTab === 'login' ? 'Entrar' : 
+                     activeTab === 'forgot' ? 'Recuperar Senha' : 'Criar Conta'}
                   </h2>
                 </div>
-                <p className="header-subtitle">
+                <p className="auth-modal-header-subtitle">
                   {activeTab === 'login' 
                     ? 'Entre para salvar seu progresso'
+                    : activeTab === 'forgot'
+                    ? needsPasswordReset 
+                      ? 'Digite o código e sua nova senha'
+                      : 'Informe seu email para recuperar o acesso'
                     : 'Crie uma conta para competir'
                   }
                 </p>
               </div>
 
-              {/* Tabs */}
-              <div className="auth-tabs">
+              <div className="auth-modal-tabs">
                 <button
                   onClick={() => setActiveTab('login')}
-                  className={`tab-button ${
-                    activeTab === 'login' ? 'active' : ''
+                  className={`auth-modal-tab-button ${
+                    activeTab === 'login' ? 'auth-modal-active' : ''
                   }`}
                 >
                   Entrar
                 </button>
                 <button
                   onClick={() => setActiveTab('signup')}
-                  className={`tab-button ${
-                    activeTab === 'signup' ? 'active' : ''
+                  className={`auth-modal-tab-button ${
+                    activeTab === 'signup' ? 'auth-modal-active' : ''
                   }`}
                 >
                   Criar Conta
                 </button>
               </div>
 
-              {/* Content */}
-              <div className="modal-content">
-                {error && <div className="error-message">{error}</div>}
-                
-                {/* Login Form */}
+              <div className="auth-modal-content">
+                {error && <div className="auth-modal-error-message">{error}</div>}
+
                 {activeTab === 'login' && (
-                  <form onSubmit={handleLogin} className="auth-form">
-                    <div className="form-group">
-                      <label htmlFor="loginEmail" className="form-label">
+                  <form onSubmit={handleLogin} className="auth-modal-form">
+                    <div className="auth-modal-form-group">
+                      <label htmlFor="loginEmail" className="auth-modal-form-label">
                         Email
                       </label>
-                      <div className="input-container">
-                        <Mail className="input-icon" />
+                      <div className="auth-modal-input-container">
+                        <Mail className="auth-modal-input-icon" />
                         <input
                           type="email"
                           id="loginEmail"
@@ -311,17 +361,17 @@ export const AuthModal = ({ isOpen, onClose }) => {
                           onChange={(e) => setLoginEmail(e.target.value)}
                           required
                           placeholder="seu@email.com"
-                          className="form-input with-icon"
+                          className="auth-modal-form-input auth-modal-with-icon"
                         />
                       </div>
                     </div>
 
-                    <div className="form-group">
-                      <label htmlFor="loginPassword" className="form-label">
+                    <div className="auth-modal-form-group">
+                      <label htmlFor="loginPassword" className="auth-modal-form-label">
                         Senha
                       </label>
-                      <div className="input-container">
-                        <Lock className="input-icon" />
+                      <div className="auth-modal-input-container">
+                        <Lock className="auth-modal-input-icon" />
                         <input
                           type="password"
                           id="loginPassword"
@@ -329,44 +379,207 @@ export const AuthModal = ({ isOpen, onClose }) => {
                           onChange={(e) => setLoginPassword(e.target.value)}
                           required
                           placeholder="••••••••"
-                          className="form-input with-icon"
+                          className="auth-modal-form-input auth-modal-with-icon"
                         />
                       </div>
                     </div>
 
-                    <div className="auth-actions">
+                    <div className="auth-modal-actions">
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         type="submit"
                         disabled={isLoading}
-                        className="btn-primary full-width"
+                        className="auth-modal-btn-primary auth-modal-full-width"
                       >
                         {isLoading ? (
                           <>
-                            <div className="loading-spinner" />
+                            <div className="auth-modal-loading-spinner" />
                             Entrando...
                           </>
                         ) : (
                           <>
-                            <LogIn className="btn-icon" />
+                            <LogIn className="auth-modal-btn-icon" />
                             Entrar
                           </>
                         )}
                       </motion.button>
+                      
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('forgot')}
+                        className="auth-modal-btn-link"
+                      >
+                        Esqueceu a senha?
+                      </button>
                     </div>
                   </form>
                 )}
 
-                {/* Signup Form */}
-                {activeTab === 'signup' && (
-                  <form onSubmit={handleSignup} className="auth-form">
-                    <div className="form-group">
-                      <label htmlFor="signupUsername" className="form-label">
-                        Nome de Usuário (opcional)
+                {activeTab === 'forgot' && !needsPasswordReset && (
+                  <form onSubmit={handleForgotPassword} className="auth-modal-form">
+                    <p className="auth-modal-forgot-description">
+                      Digite seu email e enviaremos instruções para recuperar sua senha.
+                    </p>
+
+                    <div className="auth-modal-form-group">
+                      <label htmlFor="forgotEmail" className="auth-modal-form-label">
+                        Email
                       </label>
-                      <div className="input-container">
-                        <User className="input-icon" />
+                      <div className="auth-modal-input-container">
+                        <Mail className="auth-modal-input-icon" />
+                        <input
+                          type="email"
+                          id="forgotEmail"
+                          value={forgotEmail}
+                          onChange={(e) => setForgotEmail(e.target.value)}
+                          required
+                          placeholder="seu@email.com"
+                          className="auth-modal-form-input auth-modal-with-icon"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="auth-modal-actions">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        type="submit"
+                        disabled={isLoading}
+                        className="auth-modal-btn-primary auth-modal-full-width"
+                      >
+                        {isLoading ? (
+                          <>
+                            <div className="auth-modal-loading-spinner" />
+                            Enviando...
+                          </>
+                        ) : (
+                          <>
+                            <KeyRound className="auth-modal-btn-icon" />
+                            Enviar Instruções
+                          </>
+                        )}
+                      </motion.button>
+
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('login')}
+                        className="auth-modal-btn-link auth-modal-full-width"
+                      >
+                        Voltar para o login
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {activeTab === 'forgot' && needsPasswordReset && (
+                  <form onSubmit={handleResetPassword} className="auth-modal-form">
+                    <div className="auth-modal-confirmation-info">
+                      <p>Enviamos um código de recuperação para:</p>
+                      <strong className="auth-modal-confirmation-email">{pendingEmail}</strong>
+                    </div>
+
+                    <div className="auth-modal-form-group">
+                      <label htmlFor="resetCode" className="auth-modal-form-label">
+                        Código de Recuperação
+                      </label>
+                      <div className="auth-modal-input-container">
+                        <KeyRound className="auth-modal-input-icon" />
+                        <input
+                          type="text"
+                          id="resetCode"
+                          value={resetCode}
+                          onChange={(e) => setResetCode(e.target.value)}
+                          placeholder="Digite o código recebido"
+                          required
+                          maxLength={6}
+                          className="auth-modal-form-input auth-modal-with-icon"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="auth-modal-form-group">
+                      <label htmlFor="newPassword" className="auth-modal-form-label">
+                        Nova Senha
+                      </label>
+                      <div className="auth-modal-input-container">
+                        <Lock className="auth-modal-input-icon" />
+                        <input
+                          type="password"
+                          id="newPassword"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          required
+                          minLength={8}
+                          placeholder="••••••••"
+                          className="auth-modal-form-input auth-modal-with-icon"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="auth-modal-form-group">
+                      <label htmlFor="confirmNewPassword" className="auth-modal-form-label">
+                        Confirmar Nova Senha
+                      </label>
+                      <div className="auth-modal-input-container">
+                        <Lock className="auth-modal-input-icon" />
+                        <input
+                          type="password"
+                          id="confirmNewPassword"
+                          value={confirmNewPassword}
+                          onChange={(e) => setConfirmNewPassword(e.target.value)}
+                          required
+                          minLength={8}
+                          placeholder="••••••••"
+                          className="auth-modal-form-input auth-modal-with-icon"
+                        />
+                      </div>
+                      <small className="auth-modal-password-hint">Mínimo de 8 caracteres, uma letra maiúscula e um número</small>
+                    </div>
+
+                    <div className="auth-modal-actions">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        type="submit"
+                        disabled={isLoading || resetCode.length !== 6 || newPassword !== confirmNewPassword}
+                        className="auth-modal-btn-primary auth-modal-full-width"
+                      >
+                        {isLoading ? (
+                          <>
+                            <div className="auth-modal-loading-spinner" />
+                            Alterando senha...
+                          </>
+                        ) : (
+                          <>
+                            <KeyRound className="auth-modal-btn-icon" />
+                            Alterar Senha
+                          </>
+                        )}
+                      </motion.button>
+                      
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNeedsPasswordReset(false);
+                          setActiveTab('login');
+                        }}
+                        className="auth-modal-btn-link auth-modal-full-width"
+                      >
+                        Voltar para o login
+                      </button>
+                    </div>
+                  </form>
+                )}
+
+                {activeTab === 'signup' && (
+                  <form onSubmit={handleSignup} className="auth-modal-form">
+                    <div className="auth-modal-form-group">
+                      <label htmlFor="signupUsername" className="auth-modal-form-label">
+                        Nome de Usuário
+                      </label>
+                      <div className="auth-modal-input-container">
+                        <User className="auth-modal-input-icon" />
                         <input
                           type="text"
                           id="signupUsername"
@@ -374,18 +587,17 @@ export const AuthModal = ({ isOpen, onClose }) => {
                           onChange={(e) => setSignupUsername(e.target.value)}
                           placeholder="Como você gostaria de ser chamado"
                           maxLength={50}
-                          className="form-input with-icon"
+                          className="auth-modal-form-input auth-modal-with-icon"
                         />
                       </div>
-                      <small className="username-hint">Se não preenchido, usaremos seu email</small>
                     </div>
 
-                    <div className="form-group">
-                      <label htmlFor="signupEmail" className="form-label">
+                    <div className="auth-modal-form-group">
+                      <label htmlFor="signupEmail" className="auth-modal-form-label">
                         Email
                       </label>
-                      <div className="input-container">
-                        <Mail className="input-icon" />
+                      <div className="auth-modal-input-container">
+                        <Mail className="auth-modal-input-icon" />
                         <input
                           type="email"
                           id="signupEmail"
@@ -393,17 +605,17 @@ export const AuthModal = ({ isOpen, onClose }) => {
                           onChange={(e) => setSignupEmail(e.target.value)}
                           required
                           placeholder="seu@email.com"
-                          className="form-input with-icon"
+                          className="auth-modal-form-input auth-modal-with-icon"
                         />
                       </div>
                     </div>
 
-                    <div className="form-group">
-                      <label htmlFor="signupPassword" className="form-label">
+                    <div className="auth-modal-form-group">
+                      <label htmlFor="signupPassword" className="auth-modal-form-label">
                         Senha
                       </label>
-                      <div className="input-container">
-                        <Lock className="input-icon" />
+                      <div className="auth-modal-input-container">
+                        <Lock className="auth-modal-input-icon" />
                         <input
                           type="password"
                           id="signupPassword"
@@ -412,28 +624,28 @@ export const AuthModal = ({ isOpen, onClose }) => {
                           required
                           minLength={8}
                           placeholder="••••••••"
-                          className="form-input with-icon"
+                          className="auth-modal-form-input auth-modal-with-icon"
                         />
                       </div>
-                      <small className="password-hint">Mínimo de 8 caracteres</small>
+                      <small className="auth-modal-password-hint">Mínimo de 6 caracteres, uma letra maiúscula e um número</small>
                     </div>
 
-                    <div className="auth-actions">
+                    <div className="auth-modal-actions">
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         type="submit"
                         disabled={isLoading}
-                        className="btn-secondary full-width"
+                        className="auth-modal-btn-secondary auth-modal-full-width"
                       >
                         {isLoading ? (
                           <>
-                            <div className="loading-spinner" />
+                            <div className="auth-modal-loading-spinner" />
                             Criando conta...
                           </>
                         ) : (
                           <>
-                            <UserPlus className="btn-icon" />
+                            <UserPlus className="auth-modal-btn-icon" />
                             Criar Conta
                           </>
                         )}

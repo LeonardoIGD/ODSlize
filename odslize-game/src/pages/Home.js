@@ -45,6 +45,29 @@ const Recycle = ({ className }) => (
   </svg>
 );
 
+const User = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+    <circle cx="12" cy="7" r="4"/>
+  </svg>
+);
+
+const LogOut = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+    <polyline points="16,17 21,12 16,7"/>
+    <line x1="21" y1="12" x2="9" y2="12"/>
+  </svg>
+);
+
+const LogIn = ({ className }) => (
+  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+    <polyline points="10,17 15,12 10,7"/>
+    <line x1="15" y1="12" x2="3" y2="12"/>
+  </svg>
+);
+
 const Home = () => {
   const navigate = useNavigate();
   const [showTutorial, setShowTutorial] = useState(false);
@@ -68,32 +91,75 @@ const Home = () => {
   };
 
   return (
-    <div className="modern-home-container">
-      <div className="background-elements">
+    <div className="home-modern-container">
+      <div className="home-background-elements">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
-          className="floating-element floating-teal"
+          className="home-floating-element home-floating-teal"
         />
         <motion.div
           animate={{ rotate: -360 }}
           transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-          className="floating-element floating-orange"
+          className="home-floating-element home-floating-orange"
         />
       </div>
 
-      <motion.button
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.5 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        onClick={() => setShowTutorial(true)}
-        className="help-button"
-        aria-label="Ajuda"
-      >
-        <HelpCircle className="help-icon" />
-      </motion.button>
+      <div className="home-top-right-buttons">
+        {isAvailable && (
+          isAuthenticated && user ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5 }}
+              className="home-login-button"
+            >
+              <div className="home-user-info-inner">
+                <div className="home-user-avatar">
+                  <User className="home-user-icon" />
+                </div>
+                <span className="home-user-name">
+                  {user.displayName}
+                </span>
+              </div>
+              <button
+                onClick={handleAuthClick}
+                className="home-logout-button"
+                aria-label="Sair"
+              >
+                <LogOut className="home-logout-icon" />
+              </button>
+            </motion.div>
+          ) : (
+            <motion.button
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleAuthClick}
+              className="home-login-button"
+              aria-label="Fazer Login"
+            >
+              <LogIn className="home-login-icon" />
+              <span className="home-login-text">Entrar</span>
+            </motion.button>
+          )
+        )}
+
+        <motion.button
+          initial={{ opacity: 0, scale: 0 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={() => setShowTutorial(true)}
+          className="home-help-button-top"
+          aria-label="Ajuda"
+        >
+          <HelpCircle className="home-help-icon-top" />
+        </motion.button>
+      </div>
 
       <AnimatePresence>
         {showTutorial && (
@@ -101,7 +167,7 @@ const Home = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="tutorial-overlay"
+            className="home-tutorial-overlay"
             onClick={() => setShowTutorial(false)}
           >
             <motion.div
@@ -109,78 +175,78 @@ const Home = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ type: "spring", stiffness: 200, damping: 20 }}
-              className="tutorial-modal"
+              className="home-tutorial-modal"
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 onClick={() => setShowTutorial(false)}
-                className="tutorial-close"
+                className="home-tutorial-close"
               >
-                <X className="close-icon" />
+                <X className="home-close-icon" />
               </button>
 
-            <div className="tutorial-content">
-              <div className="tutorial-header">
-                <div className="tutorial-icon">
-                  <HelpCircle className="header-icon" />
+            <div className="home-tutorial-content">
+              <div className="home-tutorial-header">
+                <div className="home-tutorial-icon">
+                  <HelpCircle className="home-header-icon" />
                 </div>
-                <h2 className="tutorial-title">Como Jogar</h2>
-                <p className="tutorial-subtitle">
+                <h2 className="home-tutorial-title">Como Jogar</h2>
+                <p className="home-tutorial-subtitle">
                   Aprenda a resolver os puzzles dos ODS
                 </p>
               </div>
 
-              <div className="tutorial-steps">
+              <div className="home-tutorial-steps">
                 <div className="tutorial-step">
-                  <div className="step-circle step-teal">1</div>
+                  <div className="home-step-circle home-step-teal">1</div>
                   <div className="step-text">
-                    <h3 className="step-title">Objetivo do Jogo</h3>
+                    <h3 className="home-step-title">Objetivo do Jogo</h3>
                     <p>Organize as peças deslizantes para montar a imagem completa do ODS. Use a imagem de referência como guia!</p>
                   </div>
                 </div>
 
                 <div className="tutorial-step">
-                  <div className="step-circle step-orange">2</div>
+                  <div className="home-step-circle home-step-orange">2</div>
                   <div className="step-text">
-                    <h3 className="step-title">Como Mover</h3>
+                    <h3 className="home-step-title">Como Mover</h3>
                     <p>Clique nas peças destacadas (com borda laranja) para movê-las para o espaço vazio. Apenas peças adjacentes ao espaço vazio podem ser movidas.</p>
                   </div>
                 </div>
 
                 <div className="tutorial-step">
-                  <div className="step-circle step-teal">3</div>
+                  <div className="home-step-circle home-step-teal">3</div>
                   <div className="step-text">
-                    <h3 className="step-title">Controles</h3>
+                    <h3 className="home-step-title">Controles</h3>
                     <p>Use os botões no topo da tela:</p>
-                    <ul className="controls-list">
+                    <ul className="home-controls-list">
                       <li><strong>Iniciar:</strong> embaralha e começa o jogo</li>
                       <li><strong>Reiniciar:</strong> volta ao estado inicial</li>
                     </ul>
                   </div>
                 </div>
 
-                <div className="tutorial-step">
-                  <div className="step-circle step-orange">4</div>
-                  <div className="step-text">
-                    <h3 className="step-title">Dica Importante</h3>
+                <div className="home-tutorial-step">
+                  <div className="home-step-circle home-step-orange">4</div>
+                  <div className="home-step-text">
+                    <h3 className="home-step-title">Dica Importante</h3>
                     <p>Observe a <strong>imagem de referência</strong> ao lado do tabuleiro. Ela mostra como a imagem deve ficar quando montada corretamente!</p>
                   </div>
                 </div>
 
-                <div className="tutorial-step">
-                  <div className="step-circle step-teal">5</div>
-                  <div className="step-text">
-                    <h3 className="step-title">Desempenho e Progressão</h3>
+                <div className="home-tutorial-step">
+                  <div className="home-step-circle home-step-teal">5</div>
+                  <div className="home-step-text">
+                    <h3 className="home-step-title">Desempenho e Progressão</h3>
                     <p>Acompanhe seu tempo e movimentos. Complete níveis para desbloquear novos desafios: 2x2, 3x3, 4x4 e Especial!</p>
                   </div>
                 </div>
               </div>
 
-              <div className="tutorial-footer">
-                <div className="tutorial-footer-text">
-                  <Leaf className="footer-icon" />
+              <div className="home-tutorial-footer">
+                <div className="home-tutorial-footer-text">
+                  <Leaf className="home-footer-icon" />
                   <p>Divirta-se aprendendo sobre sustentabilidade!</p>
-                  <Globe className="footer-icon" />
+                  <Globe className="home-footer-icon" />
                 </div>
               </div>
 
@@ -188,7 +254,7 @@ const Home = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowTutorial(false)}
-                className="tutorial-play-button"
+                className="home-tutorial-play-button"
               >
                 Entendi! Vamos Jogar
               </motion.button>
@@ -198,23 +264,23 @@ const Home = () => {
       )}
       </AnimatePresence>
 
-      <div className="main-content">
+      <div className="home-main-content">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="hero-section"
+          className="home-hero-section"
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="title-section"
+            className="home-title-section"
           >
-            <motion.h1 className="hero-title">
-              <span className="title-text">ODSlize</span>
+            <motion.h1 className="home-hero-title">
+              <span className="home-title-text">ODSlize</span>
             </motion.h1>
-            <p className="hero-subtitle">
+            <p className="home-hero-subtitle">
               Descubra os <strong>17 ODS da ONU</strong> através de puzzles interativos!
             </p>
           </motion.div>
@@ -223,86 +289,41 @@ const Home = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6, duration: 0.6 }}
-            className="feature-pills"
+            className="home-feature-pills"
           >
             <motion.div 
               whileHover={{ scale: 1.05, rotate: 2 }}
               className="feature-pill"
             >
-              <Recycle className="pill-icon" />
+              <Recycle className="home-pill-icon" />
               <span>Desafios Educativos</span>
             </motion.div>
+
             <motion.div 
               whileHover={{ scale: 1.05, rotate: -2 }}
               className="feature-pill"
             >
-              <Globe className="pill-icon" />
+              <Globe className="home-pill-icon" />
               <span>17 Objetivos</span>
             </motion.div>
+
             <motion.div 
               whileHover={{ scale: 1.05, rotate: 2 }}
               className="feature-pill"
             >
-              <Leaf className="pill-icon" />
+              <Leaf className="home-pill-icon" />
               <span>Sustentabilidade</span>
             </motion.div>
           </motion.div>
-
-          {/* Seção de Autenticação */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.7, duration: 0.6 }}
-            className="auth-section-home"
-          >
-            {isAvailable && (
-              <div className="auth-buttons-container">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowStatsModal(true)}
-                  className="home-stats-button"
-                  title="Ver suas estatísticas"
-                >
-                  📊 Estatísticas
-                </motion.button>
-
-                {isAuthenticated && user ? (
-                  <div className="user-info-home">
-                    <span className="user-greeting-home">Olá, {user.displayName || user.email || user.userId}!</span>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleAuthClick}
-                      className="home-auth-button logout"
-                    >
-                      Sair
-                    </motion.button>
-                  </div>
-                ) : (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleAuthClick}
-                    className="home-auth-button login"
-                  >
-                    🔑 Login
-                  </motion.button>
-                )}
-              </div>
-            )}
-          </motion.div>
-
           <motion.button
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.9, duration: 0.6, type: "spring", stiffness: 200 }}
+            transition={{ delay: 0.8, duration: 0.6, type: "spring", stiffness: 200 }}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.92 }}
             onClick={handleStartGame}
-            className="giant-start-button"
+            className="home-giant-start-button"
           >
-            <Globe className="start-icon" />
             <span>Jogar Agora!</span>
           </motion.button>
         </motion.div>
@@ -312,20 +333,20 @@ const Home = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1, duration: 0.6 }}
-        className="modern-footer"
+        className="home-modern-footer"
       >
-        <div className="footer-content">
-          <p className="footer-copyright">
+        <div className="home-footer-content">
+          <p className="home-footer-copyright">
             © 2025 ODSlize - Baseado nos Objetivos de Desenvolvimento Sustentável da ONU
           </p>
-          <p className="footer-info">
+          <p className="home-footer-info">
             Projeto de Gerência de Configuração e Mudanças
           </p>
           <a
             href="https://brasil.un.org/pt-br/sdgs"
             target="_blank"
             rel="noopener noreferrer"
-            className="footer-link"
+            className="home-footer-link"
           >
             <span>Saiba mais sobre os ODS</span>
           </a>

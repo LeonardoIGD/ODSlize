@@ -10,7 +10,7 @@ class AuthService {
 
   initializeService() {
     if (!validateAwsConfig()) {
-      console.warn('AWS Cognito not configured. Authentication features will be disabled.');
+      console.warn('AWS Cognito não configurado. Recursos de autenticação serão desativados.');
       return;
     }
 
@@ -21,7 +21,7 @@ class AuthService {
       });
       this.isConfigured = true;
     } catch (error) {
-      console.error('Failed to initialize Cognito User Pool:', error);
+      console.error(' Falha ao inicializar o Cognito User Pool:', error);
     }
   }
 
@@ -29,29 +29,29 @@ class AuthService {
     return this.isConfigured && this.userPool !== null;
   }
 
-  // Registrar novo usuário
-  signUp(email, password, username = '') {
+  // Função responsável pelo registro de novos usuários
+  signUp(email, password, username) {
     if (!this.isAvailable()) {
-      return Promise.reject(new Error('Authentication service not available'));
+      return Promise.reject(new Error('Serviço de autenticação não disponível.'));
+    }
+
+    if (!username || !username.trim()) {
+      return Promise.reject(new Error('Username é obrigatório.'));
     }
 
     const attributeList = [
       new CognitoUserAttribute({
         Name: 'email',
         Value: email
+      }),
+      new CognitoUserAttribute({
+        Name: 'preferred_username',
+        Value: username.trim()
       })
     ];
 
-    if (username && username.trim()) {
-      attributeList.push(new CognitoUserAttribute({
-        Name: 'preferred_username',
-        Value: username.trim()
-      }));
-    }
-
     return new Promise((resolve, reject) => {
-      // Usa email como username no Cognito
-      this.userPool.signUp(email, password, attributeList, null, (err, result) => {
+      this.userPool.signUp(username.trim(), password, attributeList, null, (err, result) => {
         if (err) {
           reject(err);
           return;
@@ -61,14 +61,14 @@ class AuthService {
     });
   }
 
-  // Confirmar registro com código (usando email como username)
-  confirmRegistration(email, confirmationCode) {
+  // Função responsável por confirmar o registro com código
+  confirmRegistration(username, confirmationCode) {
     if (!this.isAvailable()) {
-      return Promise.reject(new Error('Authentication service not available'));
+      return Promise.reject(new Error('Serviço de autenticação não disponível.'));
     }
 
     const userData = {
-      Username: email, // Usa email como username
+      Username: username,
       Pool: this.userPool
     };
     const cognitoUser = new CognitoUser(userData);
@@ -84,19 +84,19 @@ class AuthService {
     });
   }
 
-  // Login (usando email como username)
-  signIn(email, password) {
+  // Função responsável pelo login
+  signIn(usernameOrEmail, password) {
     if (!this.isAvailable()) {
-      return Promise.reject(new Error('Authentication service not available'));
+      return Promise.reject(new Error('Serviço de autenticação não disponível.'));
     }
 
     const userData = {
-      Username: email, // Usa email como username
+      Username: usernameOrEmail,
       Pool: this.userPool
     };
     const cognitoUser = new CognitoUser(userData);
     const authenticationDetails = new AuthenticationDetails({
-      Username: email, // Usa email como username
+      Username: usernameOrEmail,
       Password: password
     });
 
@@ -116,14 +116,13 @@ class AuthService {
           reject(err);
         },
         newPasswordRequired: (userAttributes, requiredAttributes) => {
-          // Se precisar de nova senha, rejeita por enquanto
           reject(new Error('Nova senha requerida. Entre em contato com o suporte.'));
         }
       });
     });
   }
 
-  // Logout
+  // Função responsável pelo logout
   signOut() {
     if (!this.isAvailable()) {
       return;
@@ -135,7 +134,7 @@ class AuthService {
     }
   }
 
-  // Obter usuário atual
+  // Função responsável por obter o usuário atual
   getCurrentUser() {
     if (!this.isAvailable()) {
       return null;
@@ -143,7 +142,7 @@ class AuthService {
     return this.userPool.getCurrentUser();
   }
 
-  // Verificar se está autenticado
+  // Função responsável por verificar se está autenticado
   isAuthenticated() {
     if (!this.isAvailable()) {
       return Promise.resolve(false);
@@ -166,10 +165,10 @@ class AuthService {
     });
   }
 
-  // Obter informações do usuário
+  // Função responsável por obter informações do usuário
   getUserInfo() {
     if (!this.isAvailable()) {
-      return Promise.reject(new Error('Authentication service not available'));
+      return Promise.reject(new Error('Serviço de autenticação não disponível.'));
     }
 
     return new Promise((resolve, reject) => {
@@ -201,7 +200,7 @@ class AuthService {
 
           resolve({
             ...userInfo,
-            userId: currentUser.getUsername(), // Será o email
+            userId: currentUser.getUsername(),
             username: currentUser.getUsername(),
             displayName: displayName,
             tokens: {
@@ -214,10 +213,10 @@ class AuthService {
     });
   }
 
-  // Reenviar código de confirmação
+  // Função responsável por reenviar código de confirmação
   resendConfirmationCode(email) {
     if (!this.isAvailable()) {
-      return Promise.reject(new Error('Authentication service not available'));
+      return Promise.reject(new Error('Serviço de autenticação não disponível.'));
     }
 
     const userData = {
@@ -233,6 +232,57 @@ class AuthService {
           return;
         }
         resolve(result);
+      });
+    });
+  }
+
+  // Função responsável por iniciar o processo de recuperação de senha
+  forgotPassword(username) {
+    if (!this.isAvailable()) {
+      return Promise.reject(new Error('Serviço de autenticação não disponível.'));
+    }
+
+    const userData = {
+      Username: username,
+      Pool: this.userPool
+    };
+    const cognitoUser = new CognitoUser(userData);
+
+    return new Promise((resolve, reject) => {
+      cognitoUser.forgotPassword({
+        onSuccess: (result) => {
+          resolve(result);
+        },
+        onFailure: (err) => {
+          reject(err);
+        },
+        inputVerificationCode: (data) => {
+          resolve(data);
+        }
+      });
+    });
+  }
+
+  // Função responsável por confirmar a nova senha com o código de verificação
+  confirmPassword(username, verificationCode, newPassword) {
+    if (!this.isAvailable()) {
+      return Promise.reject(new Error('Serviço de autenticação não disponível.'));
+    }
+
+    const userData = {
+      Username: username,
+      Pool: this.userPool
+    };
+    const cognitoUser = new CognitoUser(userData);
+
+    return new Promise((resolve, reject) => {
+      cognitoUser.confirmPassword(verificationCode, newPassword, {
+        onSuccess: () => {
+          resolve('Senha alterada com sucesso');
+        },
+        onFailure: (err) => {
+          reject(err);
+        }
       });
     });
   }

@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
 
       await checkAuthState();
     } catch (error) {
-      console.error('Auth initialization failed:', error);
+      console.error('Falha na inicialização da autenticação:', error);
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
@@ -77,14 +77,14 @@ export const AuthProvider = ({ children }) => {
         dispatch({ type: 'SET_USER', payload: null });
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error('Falha na verificação da autenticação:', error);
       dispatch({ type: 'SET_USER', payload: null });
     }
   };
 
-  const signUp = async (email, password, username = '') => {
+  const signUp = async (email, password, username) => {
     if (!authService.isAvailable()) {
-      throw new Error('Authentication service not available');
+      throw new Error('Serciço de autenticação não disponível.');
     }
 
     try {
@@ -100,16 +100,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const confirmRegistration = async (email, confirmationCode) => {
+  const confirmRegistration = async (username, confirmationCode) => {
     if (!authService.isAvailable()) {
-      throw new Error('Authentication service not available');
+      throw new Error('Serciço de autenticação não disponível.');
     }
 
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'CLEAR_ERROR' });
       
-      await authService.confirmRegistration(email, confirmationCode);
+      await authService.confirmRegistration(username, confirmationCode);
       dispatch({ type: 'SET_LOADING', payload: false });
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: error.message });
@@ -117,19 +117,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signIn = async (email, password) => {
+  const signIn = async (usernameOrEmail, password) => {
     if (!authService.isAvailable()) {
-      throw new Error('Authentication service not available');
+      throw new Error('Serciço de autenticação não disponível.');
     }
 
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'CLEAR_ERROR' });
       
-      const result = await authService.signIn(email, password);
+      const result = await authService.signIn(usernameOrEmail, password);
       const userInfo = await authService.getUserInfo();
-      
-      // Migrar scores locais para o usuário autenticado
+
       const { scoreService } = await import('../services/scoreService');
       await scoreService.migrateLocalScoresToUser(userInfo.userId);
       
@@ -154,7 +153,7 @@ export const AuthProvider = ({ children }) => {
 
   const resendConfirmationCode = async (email) => {
     if (!authService.isAvailable()) {
-      throw new Error('Authentication service not available');
+      throw new Error('Serciço de autenticação não disponível.');
     }
 
     try {
@@ -169,6 +168,40 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const forgotPassword = async (username) => {
+    if (!authService.isAvailable()) {
+      throw new Error('Serviço de autenticação não disponível.');
+    }
+
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'CLEAR_ERROR' });
+      
+      await authService.forgotPassword(username);
+      dispatch({ type: 'SET_LOADING', payload: false });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+      throw error;
+    }
+  };
+
+  const confirmPassword = async (username, verificationCode, newPassword) => {
+    if (!authService.isAvailable()) {
+      throw new Error('Serviço de autenticação não disponível.');
+    }
+
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'CLEAR_ERROR' });
+      
+      await authService.confirmPassword(username, verificationCode, newPassword);
+      dispatch({ type: 'SET_LOADING', payload: false });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+      throw error;
+    }
+  };
+
   const value = {
     ...state,
     signUp,
@@ -176,7 +209,9 @@ export const AuthProvider = ({ children }) => {
     signIn,
     signOut,
     clearError,
-    resendConfirmationCode
+    resendConfirmationCode,
+    forgotPassword,
+    confirmPassword
   };
 
   return (
@@ -189,7 +224,7 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
   }
   return context;
 };

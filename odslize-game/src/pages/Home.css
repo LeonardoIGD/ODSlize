@@ -10,20 +10,20 @@
   position: relative;
 }
 
-.background-elements {
+.home-background-elements {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
 }
 
-.floating-element {
+.home-floating-element {
   position: absolute;
   border-radius: 50%;
   filter: blur(3rem);
 }
 
-.floating-teal {
+.home-floating-teal {
   width: 20rem;
   height: 20rem;
   top: -10rem;
@@ -33,7 +33,7 @@
   animation: rotate 50s linear infinite;
 }
 
-.floating-orange {
+.home-floating-orange {
   width: 24rem;
   height: 24rem;
   bottom: -10rem;
@@ -78,7 +78,7 @@
   height: 1.5rem;
 }
 
-.tutorial-overlay {
+.home-tutorial-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
@@ -113,7 +113,7 @@
   }
 }
 
-.tutorial-close {
+.home-tutorial-close {
   position: absolute;
   top: 1rem;
   right: 1rem;
@@ -127,11 +127,11 @@
   z-index: 10;
 }
 
-.tutorial-close:hover {
+.home-tutorial-close:hover {
   background: var(--sdg-red-dark);
 }
 
-.close-icon {
+.home-close-icon {
   width: 1.25rem;
   height: 1.25rem;
 }
@@ -140,12 +140,12 @@
   padding: 2rem;
 }
 
-.tutorial-header {
+.home-tutorial-header {
   text-align: center;
   margin-bottom: 1.5rem;
 }
 
-.tutorial-icon {
+.home-tutorial-icon {
   display: inline-block;
   background: var(--sdg-teal);
   padding: 1rem;
@@ -153,7 +153,7 @@
   margin-bottom: 1rem;
 }
 
-.header-icon {
+.home-header-icon {
   width: 3rem;
   height: 3rem;
   color: white;
@@ -166,13 +166,13 @@
   margin-bottom: 0.5rem;
 }
 
-.tutorial-subtitle {
+.home-tutorial-subtitle {
   color: var(--sdg-teal);
   opacity: 0.7;
   font-size: 1.1rem;
 }
 
-.tutorial-steps {
+.home-tutorial-steps {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -196,51 +196,51 @@
   font-size: 1.2rem;
 }
 
-.step-teal {
+.home-step-teal {
   background: var(--sdg-teal);
 }
 
-.step-orange {
+.home-step-orange {
   background: var(--sdg-orange);
 }
 
-.step-text {
+.home-step-text {
   flex: 1;
 }
 
-.step-title {
+.home-step-title {
   font-size: 1.2rem;
   color: var(--sdg-teal);
   font-weight: 700;
   margin-bottom: 0.5rem;
 }
 
-.step-text p {
+.home-step-text p {
   color: #374151;
   line-height: 1.6;
 }
 
-.controls-list {
+.home-controls-list {
   margin: 0.5rem 0;
   padding-left: 1.2rem;
   color: #374151;
 }
 
-.controls-list li {
+.home-controls-list li {
   margin: 0.25rem 0;
 }
 
-.controls-list strong {
+.home-controls-list strong {
   color: var(--sdg-orange);
 }
 
-.tutorial-footer {
+.home-tutorial-footer {
   margin-top: 2rem;
   padding-top: 1.5rem;
   border-top: 2px solid var(--sdg-gray);
 }
 
-.tutorial-footer-text {
+.home-tutorial-footer-text {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -250,12 +250,12 @@
   font-size: 0.9rem;
 }
 
-.footer-icon {
+.home-footer-icon {
   width: 1rem;
   height: 1rem;
 }
 
-.tutorial-play-button {
+.home-tutorial-play-button {
   width: 100%;
   margin-top: 1.5rem;
   padding: 0.75rem 1.5rem;
@@ -270,7 +270,7 @@
   transition: all 0.3s ease;
 }
 
-.tutorial-play-button:hover {
+.home-tutorial-play-button:hover {
   background: var(--sdg-teal-dark);
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
@@ -396,7 +396,7 @@
   }
 }
 
-.main-content {
+.home-main-content {
   flex: 1;
   display: flex;
   align-items: center;
@@ -406,14 +406,14 @@
   z-index: 10;
 }
 
-.hero-section {
+.home-hero-section {
   text-align: center;
   max-width: 64rem;
   margin: 0 auto;
   width: 100%;
 }
 
-.title-section {
+.home-title-section {
   margin-bottom: 2rem;
   animation: fadeInUp 0.8s ease-out;
 }
@@ -429,11 +429,11 @@
   }
 }
 
-.hero-title {
+.home-hero-title {
   margin-bottom: 1.5rem;
 }
 
-.title-text {
+.home-title-text {
   font-size: clamp(3rem, 8vw, 8rem);
   font-weight: 900;
   color: var(--sdg-teal);
@@ -452,7 +452,7 @@
   }
 }
 
-.hero-subtitle {
+.home-hero-subtitle {
   font-size: clamp(1.1rem, 4vw, 1.5rem);
   color: var(--sdg-teal);
   opacity: 0.8;
@@ -462,7 +462,7 @@
   padding: 0 1rem;
 }
 
-.hero-subtitle strong {
+.home-hero-subtitle strong {
   color: var(--sdg-teal);
   opacity: 1;
 }
@@ -489,28 +489,28 @@
   transition: all 0.3s ease;
 }
 
-.feature-pill:hover {
+.home-feature-pill:hover {
   transform: scale(1.05) rotate(2deg);
   background: rgba(43, 139, 129, 0.15);
 }
 
-.feature-pill:nth-child(even):hover {
+.home-feature-pill:nth-child(even):hover {
   transform: scale(1.05) rotate(-2deg);
 }
 
-.pill-icon {
+.home-pill-icon {
   width: 1.25rem;
   height: 1.25rem;
   color: var(--sdg-orange);
 }
 
-.feature-pill span {
+.home-feature-pill span {
   color: var(--sdg-teal);
   font-weight: 700;
   font-size: 0.9rem;
 }
 
-.giant-start-button {
+.home-giant-start-button {
   position: relative;
   padding: 1.5rem 3rem;
   background: var(--sdg-orange);
@@ -531,12 +531,12 @@
   animation: fadeInUp 0.6s ease-out 0.8s both;
 }
 
-.giant-start-button:hover {
+.home-giant-start-button:hover {
   transform: scale(1.08);
   box-shadow: 0 12px 48px rgba(226, 143, 57, 0.6);
 }
 
-.giant-start-button:active {
+.home-giant-start-button:active {
   transform: scale(0.92);
 }
 
@@ -545,7 +545,7 @@
   height: 2rem;
 }
 
-.modern-footer {
+.home-modern-footer {
   width: 100%;
   max-width: 64rem;
   margin: 0 auto;
@@ -556,7 +556,7 @@
   animation: fadeInUp 0.6s ease-out 1s both;
 }
 
-.footer-content {
+.home-footer-content {
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(10px);
   border-radius: 1rem;
@@ -565,20 +565,20 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.footer-copyright {
+.home-footer-copyright {
   margin-bottom: 0.5rem;
   color: var(--sdg-teal);
   font-size: 0.9rem;
 }
 
-.footer-info {
+.home-footer-info {
   margin-bottom: 0.75rem;
   color: var(--sdg-teal);
   opacity: 0.8;
   font-size: 0.85rem;
 }
 
-.footer-link {
+.home-footer-link {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -589,7 +589,7 @@
   transition: all 0.3s ease;
 }
 
-.footer-link:hover {
+.home-footer-link:hover {
   color: var(--sdg-orange);
 }
 
@@ -598,8 +598,14 @@
   height: 1.25rem;
 }
 
+.home-feature-pills {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
 @media (max-width: 768px) {
-  .modern-home-container {
+  .home-modern-container {
     padding: 0.5rem;
   }
   
@@ -614,59 +620,61 @@
     height: 1.25rem;
   }
   
-  .tutorial-content {
+  .home-tutorial-content {
     padding: 1.5rem;
   }
   
-  .tutorial-title {
+  .home-tutorial-title {
     font-size: 2rem;
   }
   
-  .feature-pills {
+  .home-feature-pills {
+    display: flex;
+    justify-content: center;
     gap: 0.5rem;
   }
   
-  .feature-pill {
+  .home-feature-pill {
     padding: 0.5rem 1rem;
   }
   
-  .giant-start-button {
+  .home-giant-start-button {
     padding: 1.25rem 2.5rem;
     font-size: 1.25rem;
     margin: 2rem auto 0 auto;
     width: fit-content;
   }
   
-  .start-icon {
+  .home-start-icon {
     width: 1.5rem;
     height: 1.5rem;
   }
 }
 
 @media (max-width: 480px) {
-  .tutorial-modal {
+  .home-tutorial-modal {
     margin: 0.5rem;
     max-height: 95vh;
   }
   
-  .tutorial-content {
+  .home-tutorial-content {
     padding: 1rem;
   }
   
-  .tutorial-step {
+  .home-tutorial-step {
     flex-direction: column;
     align-items: center;
     text-align: center;
     gap: 0.75rem;
   }
   
-  .step-circle {
+  .home-step-circle {
     width: 2.5rem;
     height: 2.5rem;
     font-size: 1rem;
   }
   
-  .giant-start-button {
+  .home-giant-start-button {
     padding: 1rem 2rem;
     font-size: 1.1rem;
     flex-direction: column;
@@ -676,7 +684,6 @@
   }
 }
 
-/* Seção de Autenticação na Homepage */
 .auth-section-home {
   display: flex;
   flex-direction: column;
@@ -782,7 +789,6 @@
   max-width: 300px;
 }
 
-/* Responsividade da seção de autenticação */
 @media (max-width: 768px) {
   .auth-buttons-container {
     flex-direction: column;
@@ -803,5 +809,167 @@
   .login-hint {
     font-size: 0.8rem;
     padding: 0.6rem 1.2rem;
+  }
+}
+
+.top-right-buttons {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 50;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.home-user-info-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border-radius: 2rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid rgba(43, 139, 129, 0.3);
+}
+
+.home-user-info-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.home-user-avatar {
+  background: var(--sdg-teal);
+  color: white;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-user-icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.user-name {
+  color: var(--sdg-teal);
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: none;
+}
+
+.home-logout-button {
+  margin-left: 0.5rem;
+  padding: 0.5rem;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.home-logout-button:hover {
+  background: rgba(202, 25, 66, 0.1);
+}
+
+.home-logout-icon {
+  width: 1rem;
+  height: 1rem;
+  color: #CA1942;
+}
+
+.home-login-button {
+  background: var(--sdg-teal);
+  color: white;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.home-login-button:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+}
+
+.home-login-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.login-text {
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: none;
+}
+
+.home-help-button-top {
+  background: var(--sdg-orange);
+  color: white;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.home-help-button-top:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+}
+
+.help-icon-top {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.home-top-right-buttons {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 50;
+  display: flex;
+  gap: 0.75rem; 
+}
+
+@media (min-width: 640px) {
+  .home-top-right-buttons {
+    top: 1.5rem;
+    right: 1.5rem;
+  }
+  
+  .home-user-name {
+    display: inline;
+  }
+  
+  .home-login-text {
+    display: inline;
+  }
+  
+  .home-login-button {
+    padding: 0.75rem 1.25rem;
+  }
+  
+  .home-help-button-top {
+    padding: 1rem;
+  }
+  
+  .home-help-icon-top {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-top-right-buttons {
+    top: 1rem;
+    right: 1rem;
   }
 }
