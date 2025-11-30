@@ -1,0 +1,38 @@
+pipeline {
+    agent default
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/seuusuario/odslize-game.git'
+            }
+        }
+
+        stage('Instalar dependências') {
+            steps {
+                bat 'npm install'
+            }
+        }
+
+        stage('Executar testes') {
+            steps {
+                bat 'npm test -- --watchAll=false'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                bat 'npm run build'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build e testes concluídos com sucesso!'
+        }
+        failure {
+            echo 'Falha no pipeline.'
+        }
+    }
+}
