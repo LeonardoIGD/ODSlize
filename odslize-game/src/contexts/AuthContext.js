@@ -202,6 +202,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const deleteUserAccount = async () => {
+    if (!authService.isAvailable()) {
+      throw new Error('Serviço de autenticação não disponível.');
+    }
+
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'CLEAR_ERROR' });
+      
+      await authService.deleteUserAccount();
+      
+      // Limpa os dados locais e desloga o usuário
+      dispatch({ type: 'LOGOUT' });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+      throw error;
+    }
+  };
+
   const value = {
     ...state,
     signUp,
@@ -211,7 +230,8 @@ export const AuthProvider = ({ children }) => {
     clearError,
     resendConfirmationCode,
     forgotPassword,
-    confirmPassword
+    confirmPassword,
+    deleteUserAccount
   };
 
   return (

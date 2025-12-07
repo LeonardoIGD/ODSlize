@@ -286,6 +286,47 @@ class AuthService {
       });
     });
   }
+
+  // Função responsável por deletar a conta do usuário permanentemente
+  deleteUserAccount() {
+    if (!this.isAvailable()) {
+      return Promise.reject(new Error('Serviço de autenticação não disponível.'));
+    }
+
+    const currentUser = this.userPool.getCurrentUser();
+    
+    if (!currentUser) {
+      return Promise.reject(new Error('Nenhum usuário logado.'));
+    }
+
+    return new Promise((resolve, reject) => {
+      currentUser.getSession((err, session) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+
+        if (!session.isValid()) {
+          reject(new Error('Sessão inválida. Faça login novamente.'));
+          return;
+        }
+
+        // Deleta o usuário da pool do Cognito
+        currentUser.deleteUser((deleteErr, deleteResult) => {
+          if (deleteErr) {
+            reject(deleteErr);
+            return;
+          }
+
+          // Limpa o armazenamento local
+          localStorage.clear();
+          sessionStorage.clear();
+          
+          resolve(deleteResult);
+        });
+      });
+    });
+  }
 }
 
 export const authService = new AuthService();

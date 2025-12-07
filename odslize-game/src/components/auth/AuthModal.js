@@ -314,7 +314,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
                 </div>
                 <p className="auth-modal-header-subtitle">
                   {activeTab === 'login' 
-                    ? 'Entre para salvar seu progresso'
+                    ? 'Entre com seu email ou nome de usuário'
                     : activeTab === 'forgot'
                     ? needsPasswordReset 
                       ? 'Digite o código e sua nova senha'
@@ -350,17 +350,17 @@ export const AuthModal = ({ isOpen, onClose }) => {
                   <form onSubmit={handleLogin} className="auth-modal-form">
                     <div className="auth-modal-form-group">
                       <label htmlFor="loginEmail" className="auth-modal-form-label">
-                        Email
+                        Email ou Nome de Usuário
                       </label>
                       <div className="auth-modal-input-container">
-                        <Mail className="auth-modal-input-icon" />
+                        <User className="auth-modal-input-icon" />
                         <input
-                          type="email"
+                          type="text"
                           id="loginEmail"
                           value={loginEmail}
                           onChange={(e) => setLoginEmail(e.target.value)}
                           required
-                          placeholder="seu@email.com"
+                          placeholder="seu@email.com ou username"
                           className="auth-modal-form-input auth-modal-with-icon"
                         />
                       </div>
