@@ -74,9 +74,10 @@ export const AuthModal = ({ isOpen, onClose }) => {
     clearError();
 
     try {
-      const username = signupUsername.trim() || signupEmail;
+      const username = signupUsername.trim() || signupEmail.split('@')[0];
       await signUp(signupEmail, signupPassword, username);
-      setPendingEmail(signupEmail);
+      // Salvar username para confirmação (agora Cognito usa username como identificador)
+      setPendingEmail(username);
       setNeedsConfirmation(true);
     } catch (error) {
       console.error('Signup error:', error);
@@ -91,8 +92,8 @@ export const AuthModal = ({ isOpen, onClose }) => {
     clearError();
 
     try {
-      const identifier = signupUsername.trim() || pendingEmail;
-      await confirmRegistration(identifier, confirmationCode);
+      // Usar username para confirmação (agora Cognito usa username como identificador)
+      await confirmRegistration(pendingEmail, confirmationCode);
       setNeedsConfirmation(false);
       setPendingEmail('');
       setActiveTab('login');

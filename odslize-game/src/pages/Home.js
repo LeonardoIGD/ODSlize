@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { AuthModal } from '../components/auth/AuthModal';
 import { UserStats } from '../components/auth/UserStats';
+import { useGameState } from '../hooks/game/useGameState';
 import { UserProfileModal } from '../components/auth/UserProfileModal';
 import { HelpCircle, X, Globe, Leaf, Recycle, User, LogIn } from 'lucide-react';
 import './Home.css';
@@ -15,6 +16,7 @@ const Home = () => {
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { isAuthenticated, user, isAvailable } = useAuth();
+  const { startLevel } = useGameState();
 
   const handleAuthClick = () => {
     if (isAuthenticated) {
@@ -25,9 +27,7 @@ const Home = () => {
   };
 
   const handleStartGame = () => {
-    localStorage.setItem('autoStartGame', 'true');
-    localStorage.setItem('autoStartLevel', '1');
-    
+    startLevel();
     navigate('/game');
   };
 

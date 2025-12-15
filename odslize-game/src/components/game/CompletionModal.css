@@ -57,6 +57,45 @@
   font-size: 1.1rem;
 }
 
+.stat-item.best-score {
+  background: linear-gradient(135deg, #fff9e6 0%, #ffe8a3 100%);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #ffd700;
+  margin-top: 0.5rem;
+}
+
+.stat-item.total-games {
+  background: #f0f8ff;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border-left: 4px solid var(--sdg-teal);
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.new-best-badge {
+  text-align: center;
+  padding: 1rem;
+  margin: 1rem 0;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border-radius: 12px;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #333;
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
 .stat-label {
   font-weight: 600;
   color: #555;
@@ -295,7 +334,7 @@
   transform: translateY(-2px);
 }
 
-.btn-outline {
+/* .btn-outline {
   background: transparent;
   color: #667eea;
   border: 2px solid #667eea;
@@ -305,7 +344,7 @@
   background: #667eea;
   color: white;
   transform: translateY(-2px);
-}
+} */
 
 .close-button {
   position: absolute;

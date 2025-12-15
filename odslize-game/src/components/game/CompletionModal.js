@@ -5,7 +5,9 @@ const CompletionModal = ({
   isVisible, 
   levelCompleted, 
   stats, 
-  odsInfo, 
+  odsInfo,
+  bestScore,
+  totalGamesThisLevel,
   onNextLevel, 
   onRestart, 
   onHome, 
@@ -68,6 +70,52 @@ const CompletionModal = ({
               <span className="stat-label">Tempo:</span>
               <span className="stat-value">{stats.time}</span>
             </motion.div>
+
+            {/* Exibir melhor tempo se disponível */}
+            {stats.bestTime && (
+              <>
+                <motion.div 
+                  className="stat-item best-score"
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.9, duration: 0.4 }}
+                >
+                  <span className="stat-label">🏆 Melhor Tempo:</span>
+                  <span className="stat-value">{stats.bestTime}</span>
+                </motion.div>
+                <motion.div 
+                  className="stat-item best-score"
+                  initial={{ scale: 0.8 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 1.0, duration: 0.4 }}
+                >
+                  <span className="stat-label">🏆 Melhor Movimentos:</span>
+                  <span className="stat-value">{stats.bestMoves}</span>
+                </motion.div>
+                {stats.isNewBest && (
+                  <motion.div 
+                    className="new-best-badge"
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 1.1, type: "spring", stiffness: 200 }}
+                  >
+                    🎉 Novo Recorde! 🎉
+                  </motion.div>
+                )}
+              </>
+            )}
+            
+            {totalGamesThisLevel && (
+              <motion.div 
+                className="stat-item total-games"
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 1.1, duration: 0.4 }}
+              >
+                <span className="stat-label">Total de partidas neste nível:</span>
+                <span className="stat-value">{totalGamesThisLevel}</span>
+              </motion.div>
+            )}
           </motion.div>
 
           <motion.div 
