@@ -25,17 +25,37 @@ export const ODS_IMAGES = [
   'https://odslize-game.s3.us-east-1.amazonaws.com/assets/web/ods-logos/SDG-17.svg'
 ];
 
+// Criar um hook personalizado que injeta o getCurrentUser no gameContext
+export const useGameWithAuth = () => {
+  const auth = useAuth();
+  
+  // Função estável para obter o usuário atual
+  const getCurrentUser = useMemo(() => {
+    return () => {
+      return auth.user;
+    };
+  }, [auth.user]);
+
+  return { getCurrentUser, isAuthenticated: auth.isAuthenticated };
+};
+
 // Game Provider usando State Pattern e hooks personalizados
 export const GameProvider = ({ children }) => {
   const gameState = useGameState();
   const auth = useAuth();
 
   // Adiciona informações do usuário ao contexto do jogo
-  const gameContextValue = useMemo(() => ({
-    ...gameState,
-    getCurrentUser: () => auth.user,
-    isAuthenticated: auth.isAuthenticated
-  }), [gameState, auth.user, auth.isAuthenticated]);
+  const gameContextValue = useMemo(() => {
+    const getCurrentUser = () => {
+      return auth.user;
+    };
+
+    return {
+      ...gameState,
+      getCurrentUser,
+      isAuthenticated: auth.isAuthenticated
+    };
+  }, [gameState, auth.user, auth.isAuthenticated]);
 
   return (
     <GameContext.Provider value={gameContextValue}>

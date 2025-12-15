@@ -25,35 +25,32 @@ const ODS_COLORS = {
 // Estado quando o nível é completado
 export class LevelCompletedState extends GameState {
   async enter() {
-    await this.saveScore();
+    // Score já foi salvo no PlayingState antes de entrar neste estado
+    await this.loadBestScore();
     this.displayCompletionModal();
   }
 
-  async saveScore() {
+  async loadBestScore() {
     try {
       const stateData = this.context.getStateData();
-      const { moves = 0, timeElapsed = 0, currentLevel = 1 } = stateData;
+      const { currentLevel = 1 } = stateData;
       
-      const scoreData = {
-        level: currentLevel,
-        moves: moves,
-        time: timeElapsed
-      };
-
       // Obter informações do usuário se estiver autenticado
       const user = this.context.getCurrentUser ? this.context.getCurrentUser() : null;
       
       if (user && user.userId) {
-        // Salvar score do usuário autenticado
-        await scoreService.saveUserScore(user.userId, scoreData);
-        console.log('Score saved for authenticated user:', user.userId);
-      } else {
-        // Salvar score local
-        scoreService.saveLocalScore(scoreData);
-        console.log('Score saved locally');
+        
+        const { bestScore, totalGames } = await scoreService.getUserScoresByLevel(user.userId, currentLevel);
+        
+        if (bestScore) {
+          this.context.setStateData({ 
+            bestScore: bestScore,
+            totalGamesThisLevel: totalGames
+          });
+        } 
       }
     } catch (error) {
-      console.error('Failed to save score:', error);
+      console.error('[LevelCompletedState] Falha ao buscar melhor score:', error);
     }
   }
 
@@ -63,17 +60,18 @@ export class LevelCompletedState extends GameState {
 
   displayCompletionModal() {
     const stateData = this.context.getStateData();
-    const { moves = 0, timeElapsed = 0, currentLevel = 1, currentODS } = stateData;
+    const { moves = 0, timeElapsed = 0, currentLevel = 1, currentODS, bestScore, totalGamesThisLevel } = stateData;
     
     const odsInfo = this.prepareODSInfo(currentODS);
-    const completionStats = this.calculateCompletionStats(moves, timeElapsed);
+    const completionStats = this.calculateCompletionStats(moves, timeElapsed, bestScore);
     
     // Dispara evento para exibir modal na UI
     this.context.showCompletionModal({
       levelCompleted: currentLevel,
       stats: completionStats,
       odsInfo: odsInfo,
-      onNextLevel: () => this.goToNextLevel(),
+      bestScore: bestScore,
+      totalGamesThisLevel: totalGamesThisLevel,
       onRestart: () => this.restartLevel(),
       onHome: () => this.goToHome(),
       onClose: () => this.closeModalAndReturnToGame()
@@ -111,16 +109,30 @@ export class LevelCompletedState extends GameState {
     return ODS_COLORS[odsCode] || '#4c9f38'; // Verde padrão se não encontrar a cor
   }
 
-  calculateCompletionStats(moves, timeElapsed) {
+  calculateCompletionStats(moves, timeElapsed, bestScore) {
     const minutes = Math.floor(timeElapsed / 60);
     const seconds = timeElapsed % 60;
     
-    return {
+    const stats = {
       moves,
       time: `${minutes}:${seconds.toString().padStart(2, '0')}`,
       timeInSeconds: timeElapsed,
       performance: this.getPerformanceRating(moves, timeElapsed)
     };
+
+    // Adicionar informações do melhor tempo se disponível
+    if (bestScore) {
+      const bestMinutes = Math.floor(bestScore.time / 60);
+      const bestSeconds = bestScore.time % 60;
+      
+      stats.bestTime = `${bestMinutes}:${bestSeconds.toString().padStart(2, '0')}`;
+      stats.bestTimeInSeconds = bestScore.time;
+      stats.bestMoves = bestScore.movements;
+      stats.isNewBest = timeElapsed < bestScore.time;
+      stats.timeDifference = timeElapsed - bestScore.time;
+    }
+
+    return stats;
   }
 
   getPerformanceRating(moves, timeElapsed) {
@@ -193,8 +205,13 @@ export class LevelCompletedState extends GameState {
 
   goToHome() {
     this.hideCompletionModal();
-    const { IdleState } = require('./IdleState');
-    this.changeState(new IdleState(this.context));
+    // Retorna ao início reiniciando com o nível 1
+    this.context.setStateData({
+      selectedLevel: 1,
+      currentLevel: 1
+    });
+    const { StartingState } = require('./StartingState');
+    this.changeState(new StartingState(this.context));
   }
 
   closeModalAndReturnToGame() {

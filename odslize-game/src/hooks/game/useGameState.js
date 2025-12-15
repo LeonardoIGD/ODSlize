@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { IdleState } from '../../patterns/state/IdleState';
+import { StartingState } from '../../patterns/state/StartingState';
 import { LEVEL_CONFIGS } from '../../patterns/strategy/ShufflerStrategy';
 import { ODS_IMAGES } from '../../contexts/GameContext';
 import { shouldUseOdsImages } from '../../config/gameConfig';
+import { useAuth } from '../../contexts/AuthContext';
 
 // Hook para gerenciar o estado do jogo usando State Pattern
 export const useGameState = () => {
+  // Obter contexto de autenticação para passar aos estados
+  const auth = useAuth();
   const [stateData, setStateData] = useState({
     currentLevel: 1,
     selectedLevel: 1,
@@ -15,8 +18,10 @@ export const useGameState = () => {
     timeElapsed: 0,
     soundEnabled: true,
     isLevelCompleted: false,
+    completedBySolving: false,
     board: [],
     solutionMoves: [],
+    moveHistory: [],
     isShuffling: false,
     isSolving: false,
     isGameReady: false,
@@ -45,6 +50,7 @@ export const useGameState = () => {
 
   const [currentState, setCurrentState] = useState(null);
   const stateDataRef = useRef(stateData);
+  const initializedRef = useRef(false);
 
   useEffect(() => {
     stateDataRef.current = stateData;
@@ -130,6 +136,11 @@ export const useGameState = () => {
       return new RandomMovesStrategy();
     },
 
+    // Adicionar getCurrentUser ao gameContext para que os estados possam acessar
+    getCurrentUser: () => {
+      return auth.user;
+    },
+
     updateODSDisplay,
     hideODSDisplay,
 
@@ -137,15 +148,16 @@ export const useGameState = () => {
     hideCompletionModal,
     showAllLevelsCompletedModal,
     hideAllLevelsCompletedModal
-  }), [updateODSDisplay, hideODSDisplay, showCompletionModal, hideCompletionModal, showAllLevelsCompletedModal, hideAllLevelsCompletedModal]);
+  }), [auth.user, updateODSDisplay, hideODSDisplay, showCompletionModal, hideCompletionModal, showAllLevelsCompletedModal, hideAllLevelsCompletedModal]);
 
   useEffect(() => {
-    if (!currentState) {
-      const initialState = new IdleState(gameContext);
+    if (!currentState && !initializedRef.current) {
+      initializedRef.current = true;
+      const initialState = new StartingState(gameContext);
       setCurrentState(initialState);
       initialState.enter();
     }
-  }, [gameContext, currentState]);
+  }, [currentState, gameContext]);
 
   const selectLevel = useCallback((level) => {
     if (currentState?.selectLevel) {
@@ -154,9 +166,10 @@ export const useGameState = () => {
     return false;
   }, [currentState]);
 
-  const startLevel = useCallback(() => {
+  const startLevel = useCallback(async () => {
     if (currentState?.startLevel) {
-      return currentState.startLevel();
+      const result = await currentState.startLevel();
+      return result;
     }
     return false;
   }, [currentState]);
@@ -258,10 +271,10 @@ export const useGameState = () => {
     [stateData.solutionMoves]
   );
 
-  const currentStateName = useMemo(() => 
-    currentState ? currentState.getStateName() : 'Unknown', 
-    [currentState]
-  );
+  const currentStateName = useMemo(() => {
+    const name = currentState ? currentState.getStateName() : 'Unknown';
+    return name;
+  }, [currentState]);
 
   return {
     ...stateData,

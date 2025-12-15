@@ -1,5 +1,4 @@
 import { GameState } from './GameState';
-import { createSolvedBoard } from '../strategy/ShufflerStrategy';
 
 // Constantes para delays de solução
 const SOLUTION_DELAYS = {
@@ -28,19 +27,64 @@ export class SolvingState extends GameState {
   async executeSolution() {
     const stateData = this.context.getStateData();
     const solutionMoves = stateData.solutionMoves || [];
+    const moveHistory = stateData.moveHistory || [];
     
-    if (solutionMoves.length === 0) {
+    // Verifica se há alguma solução disponível
+    if (moveHistory.length === 0 && solutionMoves.length === 0) {
+      console.warn('⚠️ Nenhuma solução disponível');
       this.goBackToPlaying();
       return;
     }
 
     try {
-      await this.executeAllSolutionMoves(solutionMoves);
+      // PRIMEIRO: Desfazer movimentos do usuário (se houver)
+      if (moveHistory.length > 0) {
+        const historyReversed = this.convertHistoryToMoves(moveHistory);
+        await this.executeHistoryReverse(historyReversed);
+      }
+      
+      // SEGUNDO: Executar passos da solução original
+      if (solutionMoves.length > 0) {
+        await this.executeAllSolutionMoves(solutionMoves);
+      }
+      
       this.checkSolutionComplete();
     } catch (error) {
       // Em caso de erro, retorna ao estado de jogo
       this.handleError(error);
       this.goBackToPlaying();
+    }
+  }
+  
+  // Converte histórico de movimentos em lista de índices para desfazer
+  convertHistoryToMoves(moveHistory) {
+    // Inverter o histórico para desfazer do último para o primeiro
+    return moveHistory.slice().reverse();
+  }
+  
+  // Executa movimentos baseado no histórico (desfazendo)
+  async executeHistoryReverse(historyReversed) {
+    for (const move of historyReversed) {
+      if (this.getStateName() !== 'SolvingState') {
+        break;
+      }
+
+      // No histórico, temos pieceIndex e blankIndex
+      // Para desfazer, movemos a peça que está no blankIndex de volta
+      const currentState = this.context.getStateData();
+      const board = currentState.board;
+      
+      // Encontrar onde está a peça que foi movida
+      // A peça que estava em pieceIndex agora está em blankIndex
+      // Então movemos de volta: a peça em blankIndex volta para pieceIndex
+      const pieceToMove = move.blankIndex;
+      
+      if (pieceToMove !== null && pieceToMove !== undefined) {
+        await this.executeSolutionMove(pieceToMove);
+      }
+      
+      const delay = this.getSolutionDelay();
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
 
@@ -74,7 +118,10 @@ export class SolvingState extends GameState {
   }
 
   handleSuccessfulSolution(currentLevel) {
-    this.context.setStateData({ isLevelCompleted: true });
+    this.context.setStateData({ 
+      isLevelCompleted: true,
+      completedBySolving: true // Vitória usando botão resolver, não salvar score
+    });
     this.unlockNextLevel(currentLevel);
     
     const { LevelCompletedState } = require('./LevelCompletedState');
@@ -140,19 +187,11 @@ export class SolvingState extends GameState {
 
   // Lida com casos onde a solução não funcionou perfeitamente
   handleIncompleteResolution() {
-    const stateData = this.context.getStateData();
-    const levelConfig = this.context.getLevelConfig(stateData.currentLevel);
-    const solvedBoard = createSolvedBoard(levelConfig);
+    console.warn('⚠️ A solução automática não completou o puzzle perfeitamente');
     
-    this.context.setStateData({
-      board: solvedBoard,
-      isLevelCompleted: true
-    });
-
-    this.unlockNextLevel(stateData.currentLevel);
-
-    const { LevelCompletedState } = require('./LevelCompletedState');
-    this.changeState(new LevelCompletedState(this.context));
+    // NÃO auto-completar o tabuleiro
+    // Apenas voltar ao estado de jogo para o usuário continuar
+    this.goBackToPlaying();
   }
 
   unlockNextLevel(currentLevel) {
@@ -185,8 +224,8 @@ export class SolvingState extends GameState {
   }
 
   goToHome() {
-    const { IdleState } = require('./IdleState');
-    this.changeState(new IdleState(this.context));
+    const { StartingState } = require('./StartingState');
+    this.changeState(new StartingState(this.context));
   }
 
   // Para o timer do PlayingState para evitar conflitos

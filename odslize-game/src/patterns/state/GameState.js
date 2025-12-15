@@ -53,7 +53,6 @@ export class GameState {
 export class GameStateFactory {
   static createState(stateName, context) {
     const states = {
-      'IdleState': () => import('./IdleState').then(m => new m.IdleState(context)),
       'StartingState': () => import('./StartingState').then(m => new m.StartingState(context)),
       'PlayingState': () => import('./PlayingState').then(m => new m.PlayingState(context)),
       'SolvingState': () => import('./SolvingState').then(m => new m.SolvingState(context)),

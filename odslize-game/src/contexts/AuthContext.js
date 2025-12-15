@@ -69,7 +69,7 @@ export const AuthProvider = ({ children }) => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       const isAuth = await authService.isAuthenticated();
-      
+            
       if (isAuth) {
         const userInfo = await authService.getUserInfo();
         dispatch({ type: 'SET_USER', payload: userInfo });
@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
         dispatch({ type: 'SET_USER', payload: null });
       }
     } catch (error) {
-      console.error('Falha na verificação da autenticação:', error);
+      console.error('❌ [AuthContext] Falha na verificação da autenticação:', error);
       dispatch({ type: 'SET_USER', payload: null });
     }
   };
@@ -130,7 +130,8 @@ export const AuthProvider = ({ children }) => {
       const userInfo = await authService.getUserInfo();
 
       const { scoreService } = await import('../services/scoreService');
-      await scoreService.migrateLocalScoresToUser(userInfo.userId);
+      const username = userInfo.displayName || userInfo.username || userInfo.userId;
+      await scoreService.migrateLocalScoresToUser(userInfo.userId, username);
       
       dispatch({ type: 'SET_USER', payload: userInfo });
       return result;

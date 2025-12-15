@@ -51,6 +51,7 @@ class AuthService {
     ];
 
     return new Promise((resolve, reject) => {
+      // Usar USERNAME fornecido pelo usuário como identificador no Cognito
       this.userPool.signUp(username.trim(), password, attributeList, null, (err, result) => {
         if (err) {
           reject(err);
@@ -195,14 +196,21 @@ class AuthService {
             userInfo[attribute.getName()] = attribute.getValue();
           });
 
+          // sub é o ID único gerado pelo Cognito (UUID)
+          const userId = userInfo['sub'];
+          // getUsername() retorna o username usado no cadastro (ex: joao_silva)
+          const username = currentUser.getUsername();
+          // preferred_username é o nome de exibição (pode ser diferente do username de login)
           const preferredUsername = userInfo['preferred_username'];
-          const displayName = preferredUsername || userInfo.email || currentUser.getUsername();
+          // displayName para UI
+          const displayName = preferredUsername || username;
 
           resolve({
             ...userInfo,
-            userId: currentUser.getUsername(),
-            username: currentUser.getUsername(),
+            userId: userId,
+            username: username,
             displayName: displayName,
+            preferredUsername: preferredUsername,
             tokens: {
               accessToken: session.getAccessToken().getJwtToken(),
               idToken: session.getIdToken().getJwtToken()

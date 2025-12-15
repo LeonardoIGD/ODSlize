@@ -12,13 +12,6 @@ export class PlayingState extends GameState {
   }
 
   enter() {
-    const stateData = this.context.getStateData();
-    if (!stateData.board || stateData.board.length === 0) {
-      const { StartingState } = require('./StartingState');
-      this.changeState(new StartingState(this.context));
-      return;
-    }
-
     this.context.setStateData({ timeElapsed: 0 });
     this.startTimer();
   }
@@ -79,7 +72,7 @@ export class PlayingState extends GameState {
     }
 
     this.executeMove(board, pieceIndex, blankIndex);
-    this.updateGameState(board, stateData, isShuffling, isSolving);
+    this.updateGameState(board, stateData, isShuffling, isSolving, pieceIndex, blankIndex);
     
     if (!isShuffling && !isSolving) {
       this.checkForWin(board, levelConfig, stateData.currentLevel);
@@ -120,23 +113,69 @@ export class PlayingState extends GameState {
     board[pieceIndex] = 0;
   }
 
-  updateGameState(board, stateData, isShuffling, isSolving) {
+  updateGameState(board, stateData, isShuffling, isSolving, pieceIndex = null, blankIndex = null) {
     const updateData = { board };
     
     if (!isShuffling && !isSolving) {
       updateData.moves = (stateData.moves || 0) + 1;
+      
+      // Rastreia o movimento para poder desfazer depois
+      if (pieceIndex !== null && blankIndex !== null) {
+        const moveHistory = stateData.moveHistory || [];
+        updateData.moveHistory = [...moveHistory, { pieceIndex, blankIndex }];
+      }
     }
 
     this.context.setStateData(updateData);
   }
 
-  checkForWin(board, levelConfig, currentLevel) {
+  async checkForWin(board, levelConfig, currentLevel) {
     if (checkWinner(board, levelConfig)) {
-      this.context.setStateData({ isLevelCompleted: true });
+      const stateData = this.context.getStateData();
+      const { moves = 0, timeElapsed = 0, completedBySolving = false } = stateData;
+      
+      this.context.setStateData({ 
+        isLevelCompleted: true,
+        completedBySolving: false // Vitória manual, não usando botão resolver
+      });
       this.unlockNextLevel(currentLevel);
+      
+      // Salvar score ANTES de mudar de estado para garantir identificação correta do usuário
+      await this.saveScore(currentLevel, moves, timeElapsed, completedBySolving);
       
       const { LevelCompletedState } = require('./LevelCompletedState');
       this.changeState(new LevelCompletedState(this.context));
+    }
+  }
+
+  async saveScore(currentLevel, moves, timeElapsed, completedBySolving) {
+    try {
+      if (completedBySolving) {
+        return;
+      }
+      
+      const scoreData = {
+        level: currentLevel,
+        moves: moves,
+        time: timeElapsed
+      };
+
+      // Obter informações do usuário se estiver autenticado
+      const user = this.context.getCurrentUser ? this.context.getCurrentUser() : null;
+      
+      if (user && user.userId) {
+        // Salvar score do usuário autenticado
+        const username = user.displayName || user.username || user.userId;
+        const { scoreService } = await import('../../services/scoreService');
+        const result = await scoreService.saveUserScore(user.userId, username, scoreData);
+      } else {
+        // Salvar score local
+        const { scoreService } = await import('../../services/scoreService');
+        const result = scoreService.saveLocalScore(scoreData);
+      }
+    } catch (error) {
+      console.error('[PlayingState] Falha ao salvar score:', error);
+      console.error('Stack trace:', error.stack);
     }
   }
 
@@ -165,15 +204,16 @@ export class PlayingState extends GameState {
       moves: 0,
       timeElapsed: 0,
       isLevelCompleted: false,
+      completedBySolving: false,
       board: [],
       solutionMoves: [],
+      moveHistory: [],
       isShuffling: false,
       isSolving: false,
       isGameReady: false
     });
-    // Volta para IdleState para permitir nova inicialização
-    const { IdleState } = require('./IdleState');
-    this.changeState(new IdleState(this.context));
+    const { StartingState } = require('./StartingState');
+    this.changeState(new StartingState(this.context));
     
     return true;
   }
@@ -195,7 +235,8 @@ export class PlayingState extends GameState {
   }
 
   goToHome() {
-    const { IdleState } = require('./IdleState');
-    this.changeState(new IdleState(this.context));
+    // Retorna ao estado inicial (preparação de novo jogo)
+    const { StartingState } = require('./StartingState');
+    this.changeState(new StartingState(this.context));
   }
 }

@@ -65,19 +65,101 @@ class ScoreService {
     }
   }
 
-  // Salvar score do usuário autenticado via API
-  async saveUserScore(userId, scoreData) {
+  // Obter scores do usuário para um nível específico via API
+  async getUserScoresByLevel(userId, level) {
     try {
-      if (!userId) return null;
+      if (!userId || !level) {
+        return { bestScore: null, totalGames: 0 };
+      }
+
+      const url = `${this.apiBaseUrl}/score?userId=${encodeURIComponent(userId)}&level=${encodeURIComponent(level)}`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        console.error('❌ Erro ao buscar scores:', response.status);
+        return { bestScore: null, totalGames: 0 };
+      }
+
+      const data = await response.json();
+      
+      // Parse do body se necessário
+      const parsedData = typeof data.body === 'string' ? JSON.parse(data.body) : data;
+      const scores = parsedData.scores || [];
+      
+      if (scores.length === 0) {
+        return { bestScore: null, totalGames: 0 };
+      }
+
+      // Encontrar o melhor score (menor tempo)
+      const bestScore = scores.reduce((best, current) => {
+        if (!best || current.time < best.time) {
+          return current;
+        }
+        return best;
+      }, null);
+
+      return {
+        bestScore: bestScore,
+        totalGames: scores.length,
+        allScores: scores
+      };
+    } catch (error) {
+      console.error('❌ Erro ao buscar scores por nível:', error);
+      return { bestScore: null, totalGames: 0 };
+    }
+  }
+
+  // Obter leaderboard de um nível específico
+  async getLeaderboard(level) {
+    try {
+      if (!level) {
+        console.error('❌ Level não fornecido');
+        return { topScores: [], totalPlayers: 0 };
+      }
+
+      const url = `${this.apiBaseUrl}/leaderboard?level=${encodeURIComponent(level)}`;
+      const response = await fetch(url);
+
+      if (!response.ok) {
+        console.error('❌ Erro ao buscar leaderboard:', response.status);
+        return { topScores: [], totalPlayers: 0 };
+      }
+
+      const data = await response.json();
+      
+      return {
+        message: data.message,
+        level: data.level,
+        totalPlayers: data.totalPlayers,
+        topScores: data.topScores || [],
+        metadata: data.metadata
+      };
+    } catch (error) {
+      console.error('❌ Erro ao buscar leaderboard:', error);
+      return { topScores: [], totalPlayers: 0 };
+    }
+  }
+
+  // Salvar score do usuário autenticado via API
+  async saveUserScore(userId, username, scoreData) {
+    try {
+      if (!userId) {
+        console.error('❌ userId não fornecido');
+        return null;
+      }
+      if (!username) {
+        console.warn('⚠️ Username não fornecido, usando userId como fallback');
+        username = userId;
+      }
       
       const newScore = {
-        level: scoreData.level,
-        moves: scoreData.moves,
-        time: scoreData.time,
-        timestamp: new Date().toISOString(),
-        userId: userId
+        userId: userId,
+        username: username,
+        level: String(scoreData.level),
+        movements: Number.parseInt(scoreData.moves, 10),
+        time: Number.parseInt(scoreData.time, 10)
       };
-      
+
       // Tentar salvar via API
       const response = await fetch(`${this.apiBaseUrl}/score`, {
         method: 'POST',
@@ -87,14 +169,22 @@ class ScoreService {
         body: JSON.stringify(newScore)
       });
       
+      
       if (response.ok) {
         const savedScore = await response.json();
         return savedScore;
       } else {
+        const errorText = await response.text();
+        console.error('❌ Erro HTTP ao salvar score:');
+        console.error('   Status:', response.status);
+        console.error('   Status Text:', response.statusText);
+        console.error('   Response Body:', errorText);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error saving user score to API:', error);
+      console.error('❌ Erro ao salvar score na API:', error.message);
+      console.error('   Tipo de erro:', error.name);
+      console.error('   Stack:', error.stack);
       
       // Fallback para localStorage em caso de erro na API
       try {
@@ -114,7 +204,7 @@ class ScoreService {
         localStorage.setItem(userStorageKey, JSON.stringify(scores));
         return newScore;
       } catch (fallbackError) {
-        console.error('Error saving to localStorage fallback:', fallbackError);
+        console.error('❌ Erro ao salvar no localStorage:', fallbackError);
         return null;
       }
     }
@@ -223,12 +313,15 @@ class ScoreService {
   }
 
   // Migrar scores locais para usuário autenticado via API
-  async migrateLocalScoresToUser(userId) {
+  async migrateLocalScoresToUser(userId, username) {
     try {
       const localScores = this.getLocalScores();
       if (localScores.length === 0) return;
 
-      console.log(`Starting migration of ${localScores.length} local scores to user ${userId}`);
+      if (!username) {
+        console.warn('Username não fornecido para migração, usando userId como fallback');
+        username = userId;
+      }
 
       // Tentar migrar cada score para a API
       let successCount = 0;
@@ -243,7 +336,7 @@ class ScoreService {
             timestamp: score.timestamp
           };
 
-          const savedScore = await this.saveUserScore(userId, scoreData);
+          const savedScore = await this.saveUserScore(userId, username, scoreData);
           if (savedScore) {
             successCount++;
           } else {
@@ -270,7 +363,6 @@ class ScoreService {
       // Limpar scores locais após migração (mesmo que alguns tenham falhado)
       localStorage.removeItem(this.storageKey);
       
-      console.log(`Migration completed: ${successCount} scores migrated successfully, ${failedScores.length} stored locally as fallback`);
     } catch (error) {
       console.error('Error during score migration:', error);
     }
@@ -281,7 +373,6 @@ class ScoreService {
     try {
       const keys = Object.keys(localStorage).filter(key => key.startsWith(this.storageKey));
       keys.forEach(key => localStorage.removeItem(key));
-      console.log('All score data cleared');
     } catch (error) {
       console.error('Error clearing data:', error);
     }
