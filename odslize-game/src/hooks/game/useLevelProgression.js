@@ -1,22 +1,22 @@
 import { useState, useEffect, useCallback } from 'react';
 
-// Hook para gerenciar a progressão de níveis do jogo
+// Hook que gerencia progressão de níveis (unlock, completed, save/load)
 export const useLevelProgression = (initialUnlockedLevels = [1], maxLevel = 4) => {
   const [unlockedLevels, setUnlockedLevels] = useState(initialUnlockedLevels);
   const [currentLevel, setCurrentLevel] = useState(1);
   const [completedLevels, setCompletedLevels] = useState([]);
 
-  // Verifica se o nível está desbloqueado
+  // Checa se level tá desbloqueado
   const isLevelUnlocked = useCallback((level) => {
     return unlockedLevels.includes(level);
   }, [unlockedLevels]);
 
-  // Verifica se o nível está completo
+  // Checa se level foi completado
   const isLevelCompleted = useCallback((level) => {
     return completedLevels.includes(level);
   }, [completedLevels]);
 
-  // Desbloqueia o próximo nível
+  // Desbloqueia próximo level após completar um
   const unlockNextLevel = useCallback((completedLevel) => {
     const nextLevel = completedLevel + 1;
 
@@ -37,12 +37,12 @@ export const useLevelProgression = (initialUnlockedLevels = [1], maxLevel = 4) =
     return false;
   }, [maxLevel, unlockedLevels]);
 
-  // Obtém a porcentagem de progresso
+  // Calcula % de progresso
   const getProgressPercentage = useCallback(() => {
     return Math.round((completedLevels.length / maxLevel) * 100);
   }, [completedLevels.length, maxLevel]);
 
-  // Obtém o próximo nível disponível
+  // Pega próximo level disponível pra jogar
   const getNextAvailableLevel = useCallback(() => {
     for (let level = 1; level <= maxLevel; level++) {
       if (isLevelUnlocked(level) && !isLevelCompleted(level)) {
@@ -52,19 +52,19 @@ export const useLevelProgression = (initialUnlockedLevels = [1], maxLevel = 4) =
     return null;
   }, [maxLevel, isLevelUnlocked, isLevelCompleted]);
 
-  // Verifica se todos os níveis estão completos
+  // Checa se completou todos os levels
   const isGameCompleted = useCallback(() => {
     return completedLevels.length === maxLevel;
   }, [completedLevels.length, maxLevel]);
 
-  // Reinicia a progressão (para novo jogo)
+  // Reseta progressão (novo jogo)
   const resetProgression = useCallback(() => {
     setUnlockedLevels([1]);
     setCurrentLevel(1);
     setCompletedLevels([]);
   }, []);
 
-  // Carrega a progressão do localStorage
+  // Carrega progressão do localStorage
   const loadProgression = useCallback(() => {
     try {
       const saved = localStorage.getItem('odslize-progression');
@@ -78,7 +78,7 @@ export const useLevelProgression = (initialUnlockedLevels = [1], maxLevel = 4) =
     }
   }, []);
 
-  // Salva a progressão no localStorage
+  // Salva progressão no localStorage
   const saveProgression = useCallback(() => {
     try {
       const progressionData = {

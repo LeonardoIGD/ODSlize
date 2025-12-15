@@ -29,7 +29,7 @@ class AuthService {
     return this.isConfigured && this.userPool !== null;
   }
 
-  // Função responsável pelo registro de novos usuários
+  // Registra novo user no Cognito usando username como identificador
   signUp(email, password, username) {
     if (!this.isAvailable()) {
       return Promise.reject(new Error('Serviço de autenticação não disponível.'));
@@ -51,7 +51,6 @@ class AuthService {
     ];
 
     return new Promise((resolve, reject) => {
-      // Usar USERNAME fornecido pelo usuário como identificador no Cognito
       this.userPool.signUp(username.trim(), password, attributeList, null, (err, result) => {
         if (err) {
           reject(err);
@@ -62,7 +61,7 @@ class AuthService {
     });
   }
 
-  // Função responsável por confirmar o registro com código
+  // Valida o código de confirmação enviado por email
   confirmRegistration(username, confirmationCode) {
     if (!this.isAvailable()) {
       return Promise.reject(new Error('Serviço de autenticação não disponível.'));
@@ -85,7 +84,7 @@ class AuthService {
     });
   }
 
-  // Função responsável pelo login
+  // Autentica user no Cognito e retorna tokens de sessão
   signIn(usernameOrEmail, password) {
     if (!this.isAvailable()) {
       return Promise.reject(new Error('Serviço de autenticação não disponível.'));
@@ -123,7 +122,7 @@ class AuthService {
     });
   }
 
-  // Função responsável pelo logout
+  // Desloga user e limpa sessão
   signOut() {
     if (!this.isAvailable()) {
       return;
@@ -135,7 +134,7 @@ class AuthService {
     }
   }
 
-  // Função responsável por obter o usuário atual
+  // Pega instância do user logado
   getCurrentUser() {
     if (!this.isAvailable()) {
       return null;
@@ -143,7 +142,7 @@ class AuthService {
     return this.userPool.getCurrentUser();
   }
 
-  // Função responsável por verificar se está autenticado
+  // Checa se tem sessão ativa válida
   isAuthenticated() {
     if (!this.isAvailable()) {
       return Promise.resolve(false);
@@ -166,7 +165,7 @@ class AuthService {
     });
   }
 
-  // Função responsável por obter informações do usuário
+  // Busca dados do user (sub, username, email) do Cognito
   getUserInfo() {
     if (!this.isAvailable()) {
       return Promise.reject(new Error('Serviço de autenticação não disponível.'));
@@ -196,13 +195,9 @@ class AuthService {
             userInfo[attribute.getName()] = attribute.getValue();
           });
 
-          // sub é o ID único gerado pelo Cognito (UUID)
           const userId = userInfo['sub'];
-          // getUsername() retorna o username usado no cadastro (ex: joao_silva)
           const username = currentUser.getUsername();
-          // preferred_username é o nome de exibição (pode ser diferente do username de login)
           const preferredUsername = userInfo['preferred_username'];
-          // displayName para UI
           const displayName = preferredUsername || username;
 
           resolve({
@@ -221,7 +216,7 @@ class AuthService {
     });
   }
 
-  // Função responsável por reenviar código de confirmação
+  // Reenvia código de verificação por email
   resendConfirmationCode(email) {
     if (!this.isAvailable()) {
       return Promise.reject(new Error('Serviço de autenticação não disponível.'));
@@ -244,7 +239,7 @@ class AuthService {
     });
   }
 
-  // Função responsável por iniciar o processo de recuperação de senha
+  // Inicia fluxo de recuperação de senha
   forgotPassword(username) {
     if (!this.isAvailable()) {
       return Promise.reject(new Error('Serviço de autenticação não disponível.'));
@@ -271,7 +266,7 @@ class AuthService {
     });
   }
 
-  // Função responsável por confirmar a nova senha com o código de verificação
+  // Confirma nova senha usando código recebido
   confirmPassword(username, verificationCode, newPassword) {
     if (!this.isAvailable()) {
       return Promise.reject(new Error('Serviço de autenticação não disponível.'));
@@ -295,7 +290,7 @@ class AuthService {
     });
   }
 
-  // Função responsável por deletar a conta do usuário permanentemente
+  // Deleta conta do user permanentemente do Cognito
   deleteUserAccount() {
     if (!this.isAvailable()) {
       return Promise.reject(new Error('Serviço de autenticação não disponível.'));
@@ -319,14 +314,12 @@ class AuthService {
           return;
         }
 
-        // Deleta o usuário da pool do Cognito
         currentUser.deleteUser((deleteErr, deleteResult) => {
           if (deleteErr) {
             reject(deleteErr);
             return;
           }
 
-          // Limpa o armazenamento local
           localStorage.clear();
           sessionStorage.clear();
           

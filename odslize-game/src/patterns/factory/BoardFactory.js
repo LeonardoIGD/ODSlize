@@ -4,7 +4,7 @@ import { createSolvedBoard } from '../strategy/ShufflerStrategy';
 
 
 export class BoardFactory {
-  // Cria tabuleiro baseado na configuração do nível
+  // Factory que cria board baseado no tipo de nível
   static async createBoard(levelConfig, shufflerStrategy) {
     const boardType = this.determineBoardType(levelConfig);
 
@@ -22,7 +22,7 @@ export class BoardFactory {
     }
   }
 
-  // Determina o tipo de tabuleiro baseado na configuração do nível
+  // Detecta tipo do board pelo tamanho (2x2, 3x3, 4x4, 3x6)
   static determineBoardType(levelConfig) {
     const { rows, cols } = levelConfig.size;
     const totalTiles = rows * cols;
@@ -38,7 +38,7 @@ export class BoardFactory {
     }
   }
 
-  // Cria específica para tabuleiro 2x2
+  // Board 2x2 - embaralhamento leve
   static async create2x2Board(levelConfig, shufflerStrategy) {
     return this.createBaseBoard(levelConfig, shufflerStrategy, {
       animationDelay: 100,
@@ -46,7 +46,7 @@ export class BoardFactory {
     });
   }
 
-  // Criação específica para tabuleiro 3x3
+  // Board 3x3 - embaralhamento médio
   static async create3x3Board(levelConfig, shufflerStrategy) {
     return this.createBaseBoard(levelConfig, shufflerStrategy, {
       animationDelay: 150,
@@ -54,7 +54,7 @@ export class BoardFactory {
     });
   }
 
-  // Criação específica para tabuleiro 4x4
+  // Board 4x4 - embaralhamento pesado
   static async create4x4Board(levelConfig, shufflerStrategy) {
     return this.createBaseBoard(levelConfig, shufflerStrategy, {
       animationDelay: 200,
@@ -62,7 +62,7 @@ export class BoardFactory {
     });
   }
 
-  // Criação específica para tabuleiro 3x6
+  // Board 3x6 - embaralhamento extremo
   static async create3x6Board(levelConfig, shufflerStrategy) {
     return this.createBaseBoard(levelConfig, shufflerStrategy, {
       animationDelay: 250,
@@ -70,7 +70,7 @@ export class BoardFactory {
     });
   }
 
-  // Criação base do tabuleiro
+  // Método base que cria e embaralha qualquer board
   static async createBaseBoard(levelConfig, shufflerStrategy, options = {}) {
     try {
       const solvedBoard = createSolvedBoard(levelConfig);
@@ -94,7 +94,7 @@ export class BoardFactory {
     }
   }
 
-  // Valida a configuração do nível
+  // Valida se config do nível tá com os dados necessários
   static validateLevelConfig(levelConfig) {
     if (!levelConfig) {
       throw new Error('A configuração de nível é obrigatória');
@@ -111,7 +111,7 @@ export class BoardFactory {
     return true;
   }
 
-  // Cria um tabuleiro vazio com o espaço vazio no final
+  // Cria board vazio com espaço em branco no final
   static createEmptyBoard(rows, cols) {
     const size = rows * cols;
     return Array.from({ length: size }, (_, index) => 
@@ -119,7 +119,7 @@ export class BoardFactory {
     );
   }
 
-  // Clona o tabuleiro para evitar mutações
+  // Clona board pra evitar mutação acidental
   static cloneBoard(board) {
     return [...board];
   }

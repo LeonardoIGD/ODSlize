@@ -10,6 +10,7 @@ export const UserStats = ({ isOpen, onClose }) => {
   const [bestScores, setBestScores] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Carrega stats e melhores scores do user
   const loadUserStats = useCallback(async () => {
     try {
       setLoading(true);
@@ -37,12 +38,14 @@ export const UserStats = ({ isOpen, onClose }) => {
 
 
 
+  // Formata segundos em MM:SS
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  // Define cor baseado na performance de moves
   const getPerformanceColor = (moves) => {
     if (moves < 20) return '#22c55e'; // Verde
     if (moves < 40) return '#f59e0b'; // Amarelo

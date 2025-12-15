@@ -1,6 +1,6 @@
 import { GameState } from './GameState';
 
-// Constantes para delays de solução
+// Delays entre movimentos da solução
 const SOLUTION_DELAYS = {
   SMALL_BOARD: 400,
   MEDIUM_BOARD: 350,
@@ -12,7 +12,7 @@ const BOARD_SIZE_THRESHOLDS = {
   MEDIUM: 9
 };
 
-// Estado de jogo em resolução automática
+// State onde o bot resolve o puzzle automaticamente
 export class SolvingState extends GameState {
   enter() {
     this.stopPlayingTimer();
@@ -24,59 +24,51 @@ export class SolvingState extends GameState {
     this.context.setStateData({ isSolving: false });
   }
 
+  // Executa solução: desfaz moves do user, depois aplica solução salva
   async executeSolution() {
     const stateData = this.context.getStateData();
     const solutionMoves = stateData.solutionMoves || [];
     const moveHistory = stateData.moveHistory || [];
     
-    // Verifica se há alguma solução disponível
+    // Valida se tem alguma solução
     if (moveHistory.length === 0 && solutionMoves.length === 0) {
-      console.warn('⚠️ Nenhuma solução disponível');
+      console.warn('Nenhuma solução disponível');
       this.goBackToPlaying();
       return;
     }
 
     try {
-      // PRIMEIRO: Desfazer movimentos do usuário (se houver)
       if (moveHistory.length > 0) {
         const historyReversed = this.convertHistoryToMoves(moveHistory);
         await this.executeHistoryReverse(historyReversed);
       }
       
-      // SEGUNDO: Executar passos da solução original
       if (solutionMoves.length > 0) {
         await this.executeAllSolutionMoves(solutionMoves);
       }
       
       this.checkSolutionComplete();
     } catch (error) {
-      // Em caso de erro, retorna ao estado de jogo
       this.handleError(error);
       this.goBackToPlaying();
     }
   }
   
-  // Converte histórico de movimentos em lista de índices para desfazer
+  // Reverte histórico de movimentos (undo)
   convertHistoryToMoves(moveHistory) {
-    // Inverter o histórico para desfazer do último para o primeiro
+    // Inverte ordem pra desfazer do último pro primeiro
     return moveHistory.slice().reverse();
   }
   
-  // Executa movimentos baseado no histórico (desfazendo)
+  // Executa undo dos moves do histórico
   async executeHistoryReverse(historyReversed) {
     for (const move of historyReversed) {
       if (this.getStateName() !== 'SolvingState') {
         break;
       }
 
-      // No histórico, temos pieceIndex e blankIndex
-      // Para desfazer, movemos a peça que está no blankIndex de volta
       const currentState = this.context.getStateData();
       const board = currentState.board;
-      
-      // Encontrar onde está a peça que foi movida
-      // A peça que estava em pieceIndex agora está em blankIndex
-      // Então movemos de volta: a peça em blankIndex volta para pieceIndex
       const pieceToMove = move.blankIndex;
       
       if (pieceToMove !== null && pieceToMove !== undefined) {
@@ -120,7 +112,7 @@ export class SolvingState extends GameState {
   handleSuccessfulSolution(currentLevel) {
     this.context.setStateData({ 
       isLevelCompleted: true,
-      completedBySolving: true // Vitória usando botão resolver, não salvar score
+      completedBySolving: true
     });
     this.unlockNextLevel(currentLevel);
     
@@ -128,7 +120,7 @@ export class SolvingState extends GameState {
     this.changeState(new LevelCompletedState(this.context));
   }
 
-  // Converte direção em índice da peça que deve se mover
+  // Traduz direção (up/down/left/right) pra índice da peça
   getPieceToMoveFromDirection(direction) {
     const stateData = this.context.getStateData();
     const board = stateData.board;
@@ -174,7 +166,7 @@ export class SolvingState extends GameState {
     });
   }
 
-  // Obtém delay entre movimentos da solução
+  // Define delay entre moves baseado no tamanho do board
   getSolutionDelay() {
     const stateData = this.context.getStateData();
     const levelConfig = this.context.getLevelConfig(stateData.currentLevel);
@@ -185,12 +177,11 @@ export class SolvingState extends GameState {
     return SOLUTION_DELAYS.LARGE_BOARD;
   }
 
-  // Lida com casos onde a solução não funcionou perfeitamente
+  // Quando a solução não completa, volta pro PlayingState
   handleIncompleteResolution() {
-    console.warn('⚠️ A solução automática não completou o puzzle perfeitamente');
+    console.warn('A solução automática não completou o puzzle perfeitamente');
     
-    // NÃO auto-completar o tabuleiro
-    // Apenas voltar ao estado de jogo para o usuário continuar
+    // NÃO auto-completa o board, deixa user continuar
     this.goBackToPlaying();
   }
 
@@ -239,7 +230,6 @@ export class SolvingState extends GameState {
 
   // Método auxiliar para tratamento de erros
   handleError(error) {
-    // Em produção, aqui poderia ter logging centralizado
     console.error('Erro em SolvingState:', error);
   }
 }

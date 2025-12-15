@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { createContext, useContext, useReducer, useEffect } from 'react';
 import { authService } from '../services/authService';
 
 const AuthContext = createContext();
@@ -48,6 +48,7 @@ export const AuthProvider = ({ children }) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Inicializa auth verificando Cognito e user logado
   const initializeAuth = async () => {
     try {
       const isAvailable = authService.isAvailable();
@@ -65,6 +66,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Verifica estado atual da autenticação
   const checkAuthState = async () => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
@@ -77,11 +79,12 @@ export const AuthProvider = ({ children }) => {
         dispatch({ type: 'SET_USER', payload: null });
       }
     } catch (error) {
-      console.error('❌ [AuthContext] Falha na verificação da autenticação:', error);
+      console.error('[AuthContext] Falha na verificação da autenticação:', error);
       dispatch({ type: 'SET_USER', payload: null });
     }
   };
 
+  // Registra novo user no Cognito
   const signUp = async (email, password, username) => {
     if (!authService.isAvailable()) {
       throw new Error('Serciço de autenticação não disponível.');
@@ -100,6 +103,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Confirma registro com código enviado por email
   const confirmRegistration = async (username, confirmationCode) => {
     if (!authService.isAvailable()) {
       throw new Error('Serciço de autenticação não disponível.');
@@ -117,6 +121,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Faz login e migra scores locais pro user
   const signIn = async (usernameOrEmail, password) => {
     if (!authService.isAvailable()) {
       throw new Error('Serciço de autenticação não disponível.');
@@ -141,6 +146,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Desloga user do Cognito
   const signOut = () => {
     if (authService.isAvailable()) {
       authService.signOut();
@@ -152,6 +158,7 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: 'CLEAR_ERROR' });
   };
 
+  // Reenvia código de confirmação por email
   const resendConfirmationCode = async (email) => {
     if (!authService.isAvailable()) {
       throw new Error('Serciço de autenticação não disponível.');
@@ -169,6 +176,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Inicia processo de recuperação de senha
   const forgotPassword = async (username) => {
     if (!authService.isAvailable()) {
       throw new Error('Serviço de autenticação não disponível.');
@@ -186,6 +194,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Confirma nova senha com código de recuperação
   const confirmPassword = async (username, verificationCode, newPassword) => {
     if (!authService.isAvailable()) {
       throw new Error('Serviço de autenticação não disponível.');
@@ -203,6 +212,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Deleta conta do user permanentemente
   const deleteUserAccount = async () => {
     if (!authService.isAvailable()) {
       throw new Error('Serviço de autenticação não disponível.');

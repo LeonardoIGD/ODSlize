@@ -1,7 +1,7 @@
 import { GameState } from './GameState';
 import { scoreService } from '../../services/scoreService';
 
-// Cores dos ODS baseadas no padrão oficial da ONU
+// Paleta de cores oficial dos ODS da ONU
 const ODS_COLORS = {
   'ODS001': '#e5243b', // Vermelho
   'ODS002': '#dda63a', // Amarelo dourado
@@ -22,14 +22,15 @@ const ODS_COLORS = {
   'ODS017': '#19486a'  // Azul marinho
 };
 
-// Estado quando o nível é completado
+// State quando user completa um nível
 export class LevelCompletedState extends GameState {
   async enter() {
-    // Score já foi salvo no PlayingState antes de entrar neste estado
+    // Score já foi salvo no PlayingState
     await this.loadBestScore();
     this.displayCompletionModal();
   }
 
+  // Busca melhor tempo do user nesse nível
   async loadBestScore() {
     try {
       const stateData = this.context.getStateData();
@@ -37,9 +38,7 @@ export class LevelCompletedState extends GameState {
       
       // Obter informações do usuário se estiver autenticado
       const user = this.context.getCurrentUser ? this.context.getCurrentUser() : null;
-      
       if (user && user.userId) {
-        
         const { bestScore, totalGames } = await scoreService.getUserScoresByLevel(user.userId, currentLevel);
         
         if (bestScore) {
@@ -58,14 +57,14 @@ export class LevelCompletedState extends GameState {
     this.hideCompletionModal();
   }
 
+  // Monta e exibe modal de vitória com stats e info do ODS
   displayCompletionModal() {
     const stateData = this.context.getStateData();
     const { moves = 0, timeElapsed = 0, currentLevel = 1, currentODS, bestScore, totalGamesThisLevel } = stateData;
     
     const odsInfo = this.prepareODSInfo(currentODS);
     const completionStats = this.calculateCompletionStats(moves, timeElapsed, bestScore);
-    
-    // Dispara evento para exibir modal na UI
+
     this.context.showCompletionModal({
       levelCompleted: currentLevel,
       stats: completionStats,
@@ -83,9 +82,10 @@ export class LevelCompletedState extends GameState {
     this.context.hideCompletionModal();
   }
 
+  // Formata dados do ODS pra exibir no modal
   prepareODSInfo(currentODS) {
     if (!currentODS) {
-      // Fallback caso não tenha informações do ODS
+      // Fallback genérico se não tiver ODS carregado
       return {
         title: 'Objetivo de Desenvolvimento Sustentável',
         description: 'Parabéns por completar este nível!',
@@ -106,9 +106,10 @@ export class LevelCompletedState extends GameState {
   }
 
   getODSColor(odsCode) {
-    return ODS_COLORS[odsCode] || '#4c9f38'; // Verde padrão se não encontrar a cor
+    return ODS_COLORS[odsCode] || '#4c9f38';
   }
 
+  // Calcula stats da partida e compara com melhor tempo
   calculateCompletionStats(moves, timeElapsed, bestScore) {
     const minutes = Math.floor(timeElapsed / 60);
     const seconds = timeElapsed % 60;
@@ -135,8 +136,8 @@ export class LevelCompletedState extends GameState {
     return stats;
   }
 
+  // Sistema de estrelas baseado em tempo e movimentos
   getPerformanceRating(moves, timeElapsed) {
-    // Sistema simples de avaliação baseado em movimentos e tempo
     const timeScore = timeElapsed < 60 ? 3 : timeElapsed < 120 ? 2 : 1;
     const moveScore = moves < 20 ? 3 : moves < 40 ? 2 : 1;
     const totalScore = timeScore + moveScore;
@@ -162,8 +163,7 @@ export class LevelCompletedState extends GameState {
 
   selectLevel(level) {
     this.hideCompletionModal();
-    
-    // Atualiza o nível selecionado e vai para StartingState
+
     this.context.setStateData({
       selectedLevel: level,
       currentLevel: level,

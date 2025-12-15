@@ -7,6 +7,7 @@ const LeaderboardModal = ({ isVisible, level, leaderboardData, onClose }) => {
 
   const { topScores = [], totalPlayers = 0, metadata } = leaderboardData || {};
 
+  // Retorna ícone baseado na posição (ouro, prata, bronze)
   const getRankIcon = (position) => {
     switch (position) {
       case 1:
@@ -20,12 +21,14 @@ const LeaderboardModal = ({ isVisible, level, leaderboardData, onClose }) => {
     }
   };
 
+  // Formata segundos em MM:SS
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // Formata data pra formato BR
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', { 

@@ -11,6 +11,7 @@ export const UserProfileModal = ({ isOpen, onClose }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
+  // Desloga user
   const handleSignOut = async () => {
     try {
       await signOut();
@@ -20,6 +21,7 @@ export const UserProfileModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // Deleta conta permanentemente após confirmação
   const handleDeleteAccount = async () => {
     if (deleteConfirmationText !== 'Apagar conta') {
       setDeleteError('Digite exatamente "Apagar conta" para confirmar');

@@ -1,11 +1,11 @@
-// Estratégia base para embaralhamento
+// Strategy base pro embaralhamento do puzzle
 export class ShufflerStrategy {
   shuffle(board, levelConfig) {
-    throw new Error("Método shuffle deve ser implementado pela estratégia concreta");
+    throw new Error("Método shuffle deve ser implementado pela strategy concreta");
   }
 }
 
-// Função para calcular o range de movimentos baseado no nível
+// Calcula range de movimentos baseado no nível e tamanho do board
 const calculateMovementRange = (level, totalPieces) => {
   if (level === 1) {
     return [2, 3];
@@ -24,8 +24,7 @@ const calculateMovementRange = (level, totalPieces) => {
   return [base - variation, base + variation];
 };
 
-// Configurações dos níveis
-// Configurações base dos níveis (sem movementRange)
+// Configs base dos níveis (sem movementRange calculado)
 const BASE_LEVEL_CONFIGS = {
   1: { 
     size: { rows: 2, cols: 2 }, 
@@ -49,7 +48,7 @@ const BASE_LEVEL_CONFIGS = {
   }
 };
 
-// Gera configurações dos níveis
+// Gera configs finais com movementRange calculado dinamicamente
 export const LEVEL_CONFIGS = Object.keys(BASE_LEVEL_CONFIGS).reduce((configs, level) => {
   const levelNum = Number.parseInt(level);
   const baseConfig = BASE_LEVEL_CONFIGS[level];
@@ -62,13 +61,14 @@ export const LEVEL_CONFIGS = Object.keys(BASE_LEVEL_CONFIGS).reduce((configs, le
   return configs;
 }, {});
 
-// Estratégia que usa movimentos aleatórios válidos
+// Strategy que embaralha usando moves aleatórios válidos
 export class RandomMovesStrategy extends ShufflerStrategy {
   constructor() {
     super();
     this.directions = ['up', 'down', 'left', 'right'];
   }
 
+  // Embaralha board fazendo moves aleatórios e guarda solução reversa
   shuffle(board, levelConfig) {
     const boardCopy = [...board];
     const { movementRange, size } = levelConfig;
@@ -179,7 +179,7 @@ export class RandomMovesStrategy extends ShufflerStrategy {
   }
 }
 
-// Funções auxiliares para criar tabuleiros
+// Cria board resolvido (1,2,3...0)
 export const createSolvedBoard = (levelConfig) => {
   const { size } = levelConfig;
   const totalCells = size.rows * size.cols;
@@ -193,7 +193,7 @@ export const createSolvedBoard = (levelConfig) => {
   return board;
 };
 
-// Verifica se o tabuleiro está na configuração vencedora
+// Checa se board tá na config vencedora
 export const checkWinner = (board, levelConfig) => {
   const solvedBoard = createSolvedBoard(levelConfig);
   return board.every((piece, index) => piece === solvedBoard[index]);

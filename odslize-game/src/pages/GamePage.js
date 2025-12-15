@@ -46,7 +46,6 @@ const GamePage = () => {
                          currentStateName === 'SolvingState' || 
                          currentStateName === 'LevelCompletedState';
 
-  // Handlers
   const handleLevelSelect = (level) => {
     selectLevel(level);
   };
@@ -55,8 +54,8 @@ const GamePage = () => {
     await startLevel();
   };
 
+  // Reinicia level atual embaralhando novamente
   const handleReset = async () => {
-    // Reinicia o nível atual reembaralhando o tabuleiro
     await startLevel();
   };
 
@@ -78,6 +77,7 @@ const GamePage = () => {
     handleReset();
   };
 
+  // Busca e exibe ranking do level
   const handleShowLeaderboard = async () => {
     setLoadingLeaderboard(true);
     try {
@@ -85,7 +85,7 @@ const GamePage = () => {
       setLeaderboardData(data);
       setShowLeaderboard(true);
     } catch (error) {
-      console.error('❌ Erro ao buscar leaderboard:', error);
+      console.error('Erro ao buscar leaderboard:', error);
     } finally {
       setLoadingLeaderboard(false);
     }
@@ -108,7 +108,6 @@ const GamePage = () => {
   };
 
   const getTileSize = () => {
-    // Nível especial 3x6
     if (isSpecialLevel) {
       return 'tile-size-special';
     }
@@ -125,9 +124,9 @@ const GamePage = () => {
   const getPieceContent = (value) => {
     if (value === 0) return null;
 
-    // Nível especial 3x6: cada peça tem uma imagem diferente do ODS
+    // Level especial 3x6: cada peça tem imagem diferente do ODS
     if (isSpecialLevel) {
-      const odsNumber = value; // ODS de 1 a 17
+      const odsNumber = value;
       const odsCode = `ODS${odsNumber.toString().padStart(3, '0')}`;
       const odsImageUrl = `https://odslize-game.s3.us-east-1.amazonaws.com/assets/web/ods-logos/SDG-${odsNumber}.svg`;
       
@@ -144,7 +143,7 @@ const GamePage = () => {
       );
     }
 
-    // Níveis normais: uma imagem dividida em peças
+    // Níveis normais: imagem dividida em peças
     const pieceRow = Math.floor((value - 1) / gridCols);
     const pieceCol = (value - 1) % gridCols;
     
@@ -166,7 +165,7 @@ const GamePage = () => {
 
   const isPlaying = currentStateName === 'PlayingState' || currentStateName === 'SolvingState';
 
-  // Formata o tempo em MM:SS
+  // Formata tempo em MM:SS
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -203,10 +202,11 @@ const GamePage = () => {
             
             <div className="header-title-section">
               <div className="header-ods-code">
-                {odsDisplay.isVisible ? (
-                  `ODS ${odsDisplay.code.replace('ODS', '')} - ${odsDisplay.title}`
+                ODS 
+                {odsDisplay.code && odsDisplay.title ? (
+                  `${odsDisplay.code.replace('ODS', '')} - ${odsDisplay.title}`
                 ) : (
-                  `Nível ${selectedLevel} - ${currentLevelConfig?.name || 'Carregando...'}`
+                  ` - Selecione um nível`
                 )}
               </div>
             </div>

@@ -6,7 +6,7 @@ export const awsConfig = {
   domain: process.env.REACT_APP_COGNITO_DOMAIN,
 };
 
-// Validação das configurações obrigatórias
+// Valida se configs essenciais do Cognito estão setadas
 export const validateAwsConfig = () => {
   const requiredFields = ['userPoolId', 'userPoolWebClientId'];
   const missing = requiredFields.filter(field => !awsConfig[field]);

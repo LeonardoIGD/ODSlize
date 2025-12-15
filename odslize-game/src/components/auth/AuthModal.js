@@ -29,6 +29,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
 
   const { signIn, signUp, confirmRegistration, resendConfirmationCode, forgotPassword, confirmPassword, error, clearError, isAvailable } = useAuth();
 
+  // Limpa todos os forms e estados
   const resetForms = () => {
     setLoginEmail('');
     setLoginPassword('');
@@ -53,6 +54,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
     onClose();
   };
 
+  // Faz login do user
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -68,6 +70,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // Registra novo user
   const handleSignup = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -85,7 +88,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
       setIsLoading(false);
     }
   };
-
+  // Confirma registro com código do email
   const handleConfirmation = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -115,6 +118,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // Inicia processo de esqueci senha
   const handleForgotPassword = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -131,6 +135,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
     }
   };
 
+  // Reseta senha com código de verificação
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setIsLoading(true);

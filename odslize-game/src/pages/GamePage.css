@@ -245,9 +245,9 @@
 }
 
 .btn-leaderboard {
-  background: linear-gradient(135deg, #2B8B81 0%, #E28F39 100%);
-  color: white;
-  box-shadow: 0 4px 10px rgba(43, 139, 129, 0.3);
+  background-color: transparent;
+  color: #E28F39;
+  border: 2px solid #E28F39;
 }
 
 .btn-leaderboard:hover:not(:disabled) {

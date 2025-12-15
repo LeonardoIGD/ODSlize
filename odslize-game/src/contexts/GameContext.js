@@ -25,11 +25,11 @@ export const ODS_IMAGES = [
   'https://odslize-game.s3.us-east-1.amazonaws.com/assets/web/ods-logos/SDG-17.svg'
 ];
 
-// Criar um hook personalizado que injeta o getCurrentUser no gameContext
+// Hook que injeta getCurrentUser do auth no contexto do jogo
 export const useGameWithAuth = () => {
   const auth = useAuth();
   
-  // Função estável para obter o usuário atual
+  // Retorna user autenticado
   const getCurrentUser = useMemo(() => {
     return () => {
       return auth.user;

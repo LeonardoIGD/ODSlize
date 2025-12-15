@@ -1,10 +1,9 @@
 import { GameState } from './GameState';
 import { checkWinner } from '../strategy/ShufflerStrategy';
 
-// Constante para intervalo do timer
 const TIMER_INTERVAL_MS = 1000;
 
-// Estado de jogo em andamento
+// State principal onde o jogo rola
 export class PlayingState extends GameState {
   constructor(context) {
     super(context);
@@ -40,12 +39,13 @@ export class PlayingState extends GameState {
     }
   }
 
+  // Lógica principal de movimentação de peças
   makeMove(pieceIndex, options = {}) {
     const { isShuffling = false, isSolving = false } = options;
     const stateData = this.context.getStateData();
 
     if (!stateData.board || !Array.isArray(stateData.board) || stateData.board.length === 0) {
-      console.error('❌ makeMove: Board inválido ou não encontrado', stateData.board);
+      console.error('makeMove: Board inválido ou não encontrado', stateData.board);
       return false;
     }
     
@@ -113,13 +113,14 @@ export class PlayingState extends GameState {
     board[pieceIndex] = 0;
   }
 
+  // Atualiza state com novo board e incrementa moves
   updateGameState(board, stateData, isShuffling, isSolving, pieceIndex = null, blankIndex = null) {
     const updateData = { board };
     
     if (!isShuffling && !isSolving) {
       updateData.moves = (stateData.moves || 0) + 1;
       
-      // Rastreia o movimento para poder desfazer depois
+      // Guarda histórico pra poder fazer undo depois
       if (pieceIndex !== null && blankIndex !== null) {
         const moveHistory = stateData.moveHistory || [];
         updateData.moveHistory = [...moveHistory, { pieceIndex, blankIndex }];
@@ -129,6 +130,7 @@ export class PlayingState extends GameState {
     this.context.setStateData(updateData);
   }
 
+  // Checa se ganhou e salva score antes de mudar pro state de vitória
   async checkForWin(board, levelConfig, currentLevel) {
     if (checkWinner(board, levelConfig)) {
       const stateData = this.context.getStateData();
@@ -136,11 +138,10 @@ export class PlayingState extends GameState {
       
       this.context.setStateData({ 
         isLevelCompleted: true,
-        completedBySolving: false // Vitória manual, não usando botão resolver
+        completedBySolving: false
       });
       this.unlockNextLevel(currentLevel);
-      
-      // Salvar score ANTES de mudar de estado para garantir identificação correta do usuário
+
       await this.saveScore(currentLevel, moves, timeElapsed, completedBySolving);
       
       const { LevelCompletedState } = require('./LevelCompletedState');
@@ -148,6 +149,7 @@ export class PlayingState extends GameState {
     }
   }
 
+  // Manda score pro backend se user tá logado
   async saveScore(currentLevel, moves, timeElapsed, completedBySolving) {
     try {
       if (completedBySolving) {

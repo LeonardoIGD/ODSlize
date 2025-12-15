@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-// Hook para gerenciar o timer do jogo
+// Hook que gerencia timer do jogo (start, stop, pause, resume)
 export const useGameTimer = (isActive = false, onTick = null) => {
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -46,7 +46,7 @@ export const useGameTimer = (isActive = false, onTick = null) => {
     return () => clearInterval(interval);
   }, [isRunning, isActive, onTick]);
 
-  // Format time as MM:SS
+  // Formata tempo em MM:SS
   const formatTime = useCallback((seconds = timeElapsed) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;

@@ -1,11 +1,10 @@
-// Serviço para gerenciar scores dos usuários
 class ScoreService {
   constructor() {
     this.storageKey = 'odslize_scores';
     this.apiBaseUrl = 'https://63ip9pdb30.execute-api.us-east-1.amazonaws.com/prod-v1';
   }
 
-  // Obter scores do usuário local (não autenticado)
+  // Pega scores salvos no localStorage
   getLocalScores() {
     try {
       const scores = localStorage.getItem(this.storageKey);
@@ -16,7 +15,7 @@ class ScoreService {
     }
   }
 
-  // Salvar score local
+  // Salva score no localStorage (user não logado)
   saveLocalScore(scoreData) {
     try {
       const scores = this.getLocalScores();
@@ -31,7 +30,7 @@ class ScoreService {
 
       scores.push(newScore);
 
-      // Manter apenas os últimos 50 scores locais
+      // Limita a 50 scores pra não lotar o storage
       const sortedScores = scores.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       const limitedScores = sortedScores.slice(0, 50);
 
@@ -43,7 +42,7 @@ class ScoreService {
     }
   }
 
-  // Obter scores do usuário autenticado via API
+  // Busca todos os scores do user na API
   async getUserScores(userId) {
     try {
       if (!userId) return [];
@@ -65,7 +64,7 @@ class ScoreService {
     }
   }
 
-  // Obter scores do usuário para um nível específico via API
+  // Pega melhor score do user em um nível específico
   async getUserScoresByLevel(userId, level) {
     try {
       if (!userId || !level) {
@@ -76,7 +75,7 @@ class ScoreService {
       const response = await fetch(url);
 
       if (!response.ok) {
-        console.error('❌ Erro ao buscar scores:', response.status);
+        console.error('Erro ao buscar scores:', response.status);
         return { bestScore: null, totalGames: 0 };
       }
 
@@ -104,16 +103,16 @@ class ScoreService {
         allScores: scores
       };
     } catch (error) {
-      console.error('❌ Erro ao buscar scores por nível:', error);
+      console.error('Erro ao buscar scores por nível:', error);
       return { bestScore: null, totalGames: 0 };
     }
   }
 
-  // Obter leaderboard de um nível específico
+  // Busca top 10 ranking de um nível
   async getLeaderboard(level) {
     try {
       if (!level) {
-        console.error('❌ Level não fornecido');
+        console.error('Level não fornecido');
         return { topScores: [], totalPlayers: 0 };
       }
 
@@ -121,7 +120,7 @@ class ScoreService {
       const response = await fetch(url);
 
       if (!response.ok) {
-        console.error('❌ Erro ao buscar leaderboard:', response.status);
+        console.error('Erro ao buscar leaderboard:', response.status);
         return { topScores: [], totalPlayers: 0 };
       }
 
@@ -135,20 +134,20 @@ class ScoreService {
         metadata: data.metadata
       };
     } catch (error) {
-      console.error('❌ Erro ao buscar leaderboard:', error);
+      console.error('Erro ao buscar leaderboard:', error);
       return { topScores: [], totalPlayers: 0 };
     }
   }
 
-  // Salvar score do usuário autenticado via API
+  // Manda score do user logado pra API
   async saveUserScore(userId, username, scoreData) {
     try {
       if (!userId) {
-        console.error('❌ userId não fornecido');
+        console.error('userId não fornecido');
         return null;
       }
       if (!username) {
-        console.warn('⚠️ Username não fornecido, usando userId como fallback');
+        console.warn('Username não fornecido, usando userId como fallback');
         username = userId;
       }
       
@@ -175,14 +174,14 @@ class ScoreService {
         return savedScore;
       } else {
         const errorText = await response.text();
-        console.error('❌ Erro HTTP ao salvar score:');
+        console.error('Erro HTTP ao salvar score:');
         console.error('   Status:', response.status);
         console.error('   Status Text:', response.statusText);
         console.error('   Response Body:', errorText);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
     } catch (error) {
-      console.error('❌ Erro ao salvar score na API:', error.message);
+      console.error('Erro ao salvar score na API:', error.message);
       console.error('   Tipo de erro:', error.name);
       console.error('   Stack:', error.stack);
       
@@ -204,13 +203,13 @@ class ScoreService {
         localStorage.setItem(userStorageKey, JSON.stringify(scores));
         return newScore;
       } catch (fallbackError) {
-        console.error('❌ Erro ao salvar no localStorage:', fallbackError);
+        console.error('Erro ao salvar no localStorage:', fallbackError);
         return null;
       }
     }
   }
 
-  // Obter melhores scores por nível
+  // Retorna melhores scores agrupados por nível
   async getBestScores(userId = null, level = null) {
     try {
       let scores = [];
@@ -241,7 +240,7 @@ class ScoreService {
     }
   }
 
-  // Determinar se um score é melhor que outro
+  // Compara dois scores pra ver qual é melhor (menos movimentos/tempo)
   isBetterScore(newScore, existingScore) {
     if (newScore.moves !== existingScore.moves) {
       return newScore.moves < existingScore.moves;
@@ -249,7 +248,7 @@ class ScoreService {
     return newScore.time < existingScore.time;
   }
 
-  // Obter estatísticas do usuário
+  // Calcula estatísticas do user (total de jogos, melhor nível, etc)
   async getUserStats(userId = null) {
     try {
       let scores = [];
@@ -312,7 +311,7 @@ class ScoreService {
     }
   }
 
-  // Migrar scores locais para usuário autenticado via API
+  // Move scores do localStorage pro user logado na API
   async migrateLocalScoresToUser(userId, username) {
     try {
       const localScores = this.getLocalScores();
@@ -368,7 +367,7 @@ class ScoreService {
     }
   }
 
-  // Limpar todos os dados (útil para desenvolvimento)
+  // Limpa tudo do localStorage (debug only)
   clearAllData() {
     try {
       const keys = Object.keys(localStorage).filter(key => key.startsWith(this.storageKey));

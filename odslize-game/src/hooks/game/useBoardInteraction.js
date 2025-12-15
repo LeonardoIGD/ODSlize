@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 
-// Hook para gerenciar a interação do tabuleiro do jogo
+// Hook que gerencia interação com board (cliques, hover, validação de moves)
 export const useBoardInteraction = (board, levelConfig, onMove = null) => {
   const [highlightedTile, setHighlightedTile] = useState(null);
 
@@ -8,7 +8,7 @@ export const useBoardInteraction = (board, levelConfig, onMove = null) => {
     return board ? board.indexOf(0) : -1;
   }, [board]);
 
-  // Verifica se um movimento é válido
+  // Checa se peça pode mover pro espaço vazio
   const isValidMove = useCallback((tileIndex) => {
     if (!levelConfig || emptyIndex === -1) return false;
 
@@ -24,7 +24,7 @@ export const useBoardInteraction = (board, levelConfig, onMove = null) => {
     );
   }, [emptyIndex, levelConfig]);
 
-  // Obtém todos os movimentos válidos
+  // Lista todas as peças que podem mover
   const getValidMoves = useCallback(() => {
     if (!levelConfig || emptyIndex === -1) return [];
 
@@ -41,7 +41,7 @@ export const useBoardInteraction = (board, levelConfig, onMove = null) => {
     return validMoves;
   }, [emptyIndex, levelConfig, isValidMove]);
 
-  // Manipulador de clique em peça
+  // Handler de clique na peça
   const handleTileClick = useCallback((tileIndex) => {
     if (isValidMove(tileIndex)) {
       if (onMove) {

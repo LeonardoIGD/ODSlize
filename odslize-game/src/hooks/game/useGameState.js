@@ -226,7 +226,7 @@ export const useGameState = () => {
     return LEVEL_CONFIGS[level];
   }, []);
 
-  // Função para inicializar o jogo
+  // Inicializa jogo com StartingState
   const initializeGame = useCallback(async (level) => {
     setStateData(prev => ({ ...prev, selectedLevel: level }));
     
@@ -310,12 +310,8 @@ export const useGameState = () => {
     showAllLevelsCompletedModal,
     hideAllLevelsCompletedModal,
 
-    // Função de inicialização
     initializeGame,
-
-    // Configurações
     getLevelConfig,
-
     levelConfigs: LEVEL_CONFIGS,
     odsImages: ODS_IMAGES
   };
