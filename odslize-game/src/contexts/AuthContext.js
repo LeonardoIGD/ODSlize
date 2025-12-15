@@ -1,0 +1,261 @@
+import { createContext, useContext, useReducer, useEffect } from 'react';
+import { authService } from '../services/authService';
+
+const AuthContext = createContext();
+
+const authReducer = (state, action) => {
+  switch (action.type) {
+    case 'SET_LOADING':
+      return { ...state, loading: action.payload };
+    case 'SET_USER':
+      return { 
+        ...state, 
+        user: action.payload, 
+        isAuthenticated: !!action.payload,
+        loading: false 
+      };
+    case 'SET_ERROR':
+      return { ...state, error: action.payload, loading: false };
+    case 'CLEAR_ERROR':
+      return { ...state, error: null };
+    case 'LOGOUT':
+      return { 
+        ...state, 
+        user: null, 
+        isAuthenticated: false, 
+        loading: false 
+      };
+    case 'SET_AVAILABLE':
+      return { ...state, isAvailable: action.payload };
+    default:
+      return state;
+  }
+};
+
+const initialState = {
+  user: null,
+  isAuthenticated: false,
+  isAvailable: false,
+  loading: true,
+  error: null
+};
+
+export const AuthProvider = ({ children }) => {
+  const [state, dispatch] = useReducer(authReducer, initialState);
+
+  useEffect(() => {
+    initializeAuth();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Inicializa auth verificando Cognito e user logado
+  const initializeAuth = async () => {
+    try {
+      const isAvailable = authService.isAvailable();
+      dispatch({ type: 'SET_AVAILABLE', payload: isAvailable });
+
+      if (!isAvailable) {
+        dispatch({ type: 'SET_LOADING', payload: false });
+        return;
+      }
+
+      await checkAuthState();
+    } catch (error) {
+      console.error('Falha na inicialização da autenticação:', error);
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
+  // Verifica estado atual da autenticação
+  const checkAuthState = async () => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      const isAuth = await authService.isAuthenticated();
+            
+      if (isAuth) {
+        const userInfo = await authService.getUserInfo();
+        dispatch({ type: 'SET_USER', payload: userInfo });
+      } else {
+        dispatch({ type: 'SET_USER', payload: null });
+      }
+    } catch (error) {
+      console.error('[AuthContext] Falha na verificação da autenticação:', error);
+      dispatch({ type: 'SET_USER', payload: null });
+    }
+  };
+
+  // Registra novo user no Cognito
+  const signUp = async (email, password, username) => {
+    if (!authService.isAvailable()) {
+      throw new Error('Serciço de autenticação não disponível.');
+    }
+
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'CLEAR_ERROR' });
+      
+      const result = await authService.signUp(email, password, username);
+      dispatch({ type: 'SET_LOADING', payload: false });
+      return result;
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+      throw error;
+    }
+  };
+
+  // Confirma registro com código enviado por email
+  const confirmRegistration = async (username, confirmationCode) => {
+    if (!authService.isAvailable()) {
+      throw new Error('Serciço de autenticação não disponível.');
+    }
+
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'CLEAR_ERROR' });
+      
+      await authService.confirmRegistration(username, confirmationCode);
+      dispatch({ type: 'SET_LOADING', payload: false });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+      throw error;
+    }
+  };
+
+  // Faz login e migra scores locais pro user
+  const signIn = async (usernameOrEmail, password) => {
+    if (!authService.isAvailable()) {
+      throw new Error('Serciço de autenticação não disponível.');
+    }
+
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'CLEAR_ERROR' });
+      
+      const result = await authService.signIn(usernameOrEmail, password);
+      const userInfo = await authService.getUserInfo();
+
+      const { scoreService } = await import('../services/scoreService');
+      const username = userInfo.displayName || userInfo.username || userInfo.userId;
+      await scoreService.migrateLocalScoresToUser(userInfo.userId, username);
+      
+      dispatch({ type: 'SET_USER', payload: userInfo });
+      return result;
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+      throw error;
+    }
+  };
+
+  // Desloga user do Cognito
+  const signOut = () => {
+    if (authService.isAvailable()) {
+      authService.signOut();
+    }
+    dispatch({ type: 'LOGOUT' });
+  };
+
+  const clearError = () => {
+    dispatch({ type: 'CLEAR_ERROR' });
+  };
+
+  // Reenvia código de confirmação por email
+  const resendConfirmationCode = async (email) => {
+    if (!authService.isAvailable()) {
+      throw new Error('Serciço de autenticação não disponível.');
+    }
+
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'CLEAR_ERROR' });
+      
+      await authService.resendConfirmationCode(email);
+      dispatch({ type: 'SET_LOADING', payload: false });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+      throw error;
+    }
+  };
+
+  // Inicia processo de recuperação de senha
+  const forgotPassword = async (username) => {
+    if (!authService.isAvailable()) {
+      throw new Error('Serviço de autenticação não disponível.');
+    }
+
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'CLEAR_ERROR' });
+      
+      await authService.forgotPassword(username);
+      dispatch({ type: 'SET_LOADING', payload: false });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+      throw error;
+    }
+  };
+
+  // Confirma nova senha com código de recuperação
+  const confirmPassword = async (username, verificationCode, newPassword) => {
+    if (!authService.isAvailable()) {
+      throw new Error('Serviço de autenticação não disponível.');
+    }
+
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'CLEAR_ERROR' });
+      
+      await authService.confirmPassword(username, verificationCode, newPassword);
+      dispatch({ type: 'SET_LOADING', payload: false });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+      throw error;
+    }
+  };
+
+  // Deleta conta do user permanentemente
+  const deleteUserAccount = async () => {
+    if (!authService.isAvailable()) {
+      throw new Error('Serviço de autenticação não disponível.');
+    }
+
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'CLEAR_ERROR' });
+      
+      await authService.deleteUserAccount();
+      
+      // Limpa os dados locais e desloga o usuário
+      dispatch({ type: 'LOGOUT' });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error.message });
+      throw error;
+    }
+  };
+
+  const value = {
+    ...state,
+    signUp,
+    confirmRegistration,
+    signIn,
+    signOut,
+    clearError,
+    resendConfirmationCode,
+    forgotPassword,
+    confirmPassword,
+    deleteUserAccount
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+  }
+  return context;
+};
